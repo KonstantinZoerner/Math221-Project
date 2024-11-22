@@ -4,40 +4,6 @@ from sklearn.datasets import make_classification
 import time
 from sklearn.metrics import pairwise_distances
 
-def gaussian_sketching_matrix(m, n):
-    """
-    Generates a Gaussian sketching matrix of dimensions m x n.
-    
-    Parameters:
-    m (int): Number of rows (target dimensionality).
-    n (int): Number of columns (original dimensionality).
-    
-    Returns:
-    numpy.ndarray: Gaussian sketching matrix of shape (m, n).
-    """
-    # Create an m x n matrix with entries sampled from a standard normal distribution
-    sketching_matrix = np.random.normal(0, 1, (m, n))
-    return sketching_matrix
-
-
-def uniform_sketching_matrix(m, n, low=-1, high=1):
-    """
-    Generates a uniform sketching matrix of dimensions m x n.
-    
-    Parameters:
-    m (int): Number of rows (target dimensionality).
-    n (int): Number of columns (original dimensionality).
-    low (float): Lower bound of the uniform distribution.
-    high (float): Upper bound of the uniform distribution.
-    
-    Returns:
-    numpy.ndarray: Uniform sketching matrix of shape (m, n).
-    """
-    # Create an m x n matrix with entries sampled from a uniform distribution in [low, high]
-    sketching_matrix = np.random.uniform(low, high, (m, n))
-    return sketching_matrix
-
-
 
 def matrix_generation(t,r,m,n):
     H = np.random.rand(m,n)
@@ -55,15 +21,14 @@ def matrix_generation(t,r,m,n):
 def random_matrix_generation(m,n):
     X, _ = make_classification(n_samples=1000, n_features=500, random_state=42)
 
-def evaluate_sketching(sketching_matrices,input_matrix):
-    
-    start_time = time.time()
-    sketched_matrix=sketching_matrices@input_matrix
-    sketching_time = time.time() - start_time
-    U_a,S_a,V_a=np.linalg.svd(sketched_matrix)
-    approx_matrix=U_a@S_a@V_a
-    original_distances = pairwise_distances(input_matrix)
-    projected_distances = pairwise_distances(approx_matrix)
-    difference = np.abs(original_distances - projected_distances) / (original_distances + 1e-9)  # avoid div by zero
-    return difference,sketching_time
+def standard_svd(input_matrix,k):
+    u,s,vh=np.linalg.svd(input_matrix,full_matrices=False)
+    s_truncated=np.diag(s[:k])
+    return u@s_truncated@vh
 
+def svd_computation_and_error(Q,B,svd_result):
+    u,s,vh=np.linalg.svd(B,full_matrices=False)
+    s_truncated=np.linalg(s)
+    estimation=Q@u@s_truncated@vh
+    distance=np.linalg.norm(estimation-svd_result)
+    return distance
