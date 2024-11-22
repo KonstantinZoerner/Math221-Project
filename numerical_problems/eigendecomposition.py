@@ -11,8 +11,10 @@ def eigendecomposition(A):
 
     return A_reconstructed
 
-def hermitian_matrix_generation(m):
-    A=np.random.rand(m,m)
-    symmetric_matrix=(A+A.T)/2
-    return symmetric_matrix
+#Low-rank eigendecomposition under QB algorithms
+def randomized_eigendecomposition(Q,B):
+    C=B@Q
+    eig_value,eig_vector=np.linalg.eig(C)
+    V=Q@eig_vector
+    return V,eig_value
     
