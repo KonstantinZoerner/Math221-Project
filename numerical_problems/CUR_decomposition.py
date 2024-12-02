@@ -38,16 +38,5 @@ def cur_decomposition(A, c, r, rank=None):
     S_inv = np.diag(1 / S[:rank])  # Inverse of singular values (truncate to `rank`)
     U = VT[:rank, :].T @ S_inv @ U[:, :rank].T  # Core matrix U
     
-    return C, U, R
+    return C@U@R
 
-# Example usage
-A = np.random.rand(6, 5)  # Example matrix
-c = 3  # Number of columns to sample
-r = 3  # Number of rows to sample
-
-C, U, R = cur_decomposition(A, c, r)
-
-# Verify decomposition
-A_approx = C @ U @ R
-print("Original Matrix A:\n", A)
-print("Approximated Matrix A_approx:\n", A_approx)
