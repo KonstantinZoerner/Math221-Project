@@ -8,7 +8,7 @@ from sklearn.metrics import pairwise_distances
 def standard_svd(input_matrix):
     u,s,vh=np.linalg.svd(input_matrix,full_matrices=False)
     s_truncated=np.diag(s)
-    return u@s_truncated@vh
+    return u@s_truncated@vh, s
 
 #after we got QB decomposition, do SVD do get how well the approximation is, and how the singular value changes
 def svd_computation_and_error(Q,B,svd_result):
