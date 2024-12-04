@@ -3,7 +3,7 @@ import numpy as np
 def randQB_FP_auto(A, relerr,b,p,Omg):
     m,n=A.shape
     Q=np.zeros((m,1))
-    B=np.zeros(0,n)
+    B=np.zeros((1,n))
     maxiter=50
     maxiter=np.min(maxiter,np.ceil(np.min(m,n)/3/b))
     l=b*maxiter
@@ -26,8 +26,12 @@ def randQB_FP_auto(A, relerr,b,p,Omg):
         R=R1@R
         
         Bi=np.linalg.inv(R.T)@((H[:,r:r+b-1]).T-(Y.T@Q)@B-t.T@B)
-        Q=np.hstack((Q,Qi))
-        B=np.vstack((B,Bi))
+        if i==1:
+            Q=Qi
+            B=Bi
+        else:
+            Q=np.hstack((Q,Qi))
+            B=np.vstack((B,Bi))
         r=r+b
 
         temp=E-np.linalg.norm(Bi,'fro')**2
