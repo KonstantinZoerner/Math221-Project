@@ -1,9 +1,12 @@
 import numpy as np
 import scipy
 import utils
-import utils.helpers
-
-def sketch_SRTT(k, A):
+#import utils.helpers
+from skylark.sketch import JLT,CWT
+#import two kinds of sketching matrices
+sketches={ "JLT" : JLT, "CWT" : CWT }
+#这个JLT是什么
+def sketch_SRTT(k, p,n):
     """
     Perform a Subsampled Randomized Trigonometric Transform (SRTT) sketch of the matrix A.
 
@@ -17,13 +20,17 @@ def sketch_SRTT(k, A):
     Raises:
     AssertionError: If k is not less than the number of rows in A.
     """
-    
-    m = A.shape[0]
-    assert k < m
-    angle = np.random.uniform(0, 2*np.pi, m)
-    D = np.diag(np.exp(angle * 1j))
-    FFT = np.fft.fft(D @ A)
-    return FFT[np.random.choice(FFT.shape[0], k, replace=False)]
+    for sname in sketches:
+        stype=sketches[sname]
+        S=stype(n,k+p,defouttype="SharedMatrix")
+        '''m = A.shape[0]
+        assert k < m
+        angle = np.random.uniform(0, 2*np.pi, m)
+        D = np.diag(np.exp(angle * 1j))
+        FFT = np.fft.fft(D @ A)
+        return FFT[np.random.choice(FFT.shape[0], k, replace=False)]'''
+        return S
+#return relevant matrices that we need here
 
 def sketch_hadamard(k, A):
     """
@@ -104,7 +111,6 @@ def uniform_sketching_matrix(m, n, low=-1, high=1):
 import numpy as np
 from sklearn.random_projection import johnson_lindenstrauss_min_dim
 from sklearn.random_projection import GaussianRandomProjection
-
 def johnson_lindenstrauss_transform(data, n_components):
     """
     Apply the Johnson-Lindenstrauss Transform using Gaussian Random Projection.
