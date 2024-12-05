@@ -5,7 +5,8 @@ def randQB_FP_auto(A, relerr,b,p,Omg):
     Q=np.zeros((m,1))
     B=np.zeros((1,n))
     maxiter=50
-    maxiter=np.min(maxiter,np.ceil(np.min(m,n)/3/b))
+    #print(m,n)
+    maxiter=np.min((maxiter,np.ceil(np.min((m,n))/3/b)))
     l=b*maxiter
     while(p>0):
         G,_=np.linalg.qr(A@Omg)
