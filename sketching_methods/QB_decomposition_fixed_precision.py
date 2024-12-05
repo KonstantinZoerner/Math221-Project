@@ -1,4 +1,5 @@
 import numpy as np
+import torch
 #from sketching_methods.sketching import sketch_SRTT
 def randQB_FP_auto(A, relerr,b,p,Omg):
     m,n=A.shape
@@ -12,21 +13,21 @@ def randQB_FP_auto(A, relerr,b,p,Omg):
         G,_=np.linalg.qr(A@Omg)
         Omg,_=np.linalg.qr(A.T@G)
         p=p-1
-    G=float(A@Omg)
+    G=(A@Omg).type(torch.FloatTensor)
     H=A.T@G
     E=np.linalg.norm(A,'fro')**2
     E0=E
     threshold=relerr**2*E
     r=1
     flag=False
-    for i in range(1,maxiter):
+    for i in range(1,int(maxiter)):
         t=B@Omg[:,r:r+b-1]
         Y=G[:,r:r+b-1]
         Qi,R=np.linalg.qr(Y)
-        Qi,R1=np.linalg.qr(Qi-Q*(Q.T@Qi))
+        Qi,R1=np.linalg.qr(Qi-Q@(Q.T@Qi))
         R=R1@R
         
-        Bi=np.linalg.inv(R.T)@((H[:,r:r+b-1]).T-(Y.T@Q)@B-t.T@B)
+        Bi=torch.from_numpy(np.linalg.inv(R.T))@((H[:,r:r+b-1]).T-(Y.T@Q)@B-t.T@B)
         if i==1:
             Q=Qi
             B=Bi
