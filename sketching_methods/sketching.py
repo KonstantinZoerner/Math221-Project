@@ -2,7 +2,7 @@ import numpy as np
 import scipy
 import utils
 
-#这个JLT是什么
+
 #def sketch_SRTT(k, p,n):
 """
     Perform a Subsampled Randomized Trigonometric Transform (SRTT) sketch of the matrix A.
@@ -103,4 +103,9 @@ def uniform_sketching_matrix(m, n, low=-1, high=1):
     # Create an m x n matrix with entries sampled from a uniform distribution in [low, high]
     sketching_matrix = np.random.uniform(low, high, (m, n))
     return sketching_matrix
+
+def rademacher_sketch_matrix(m,n):
+    sketching_matrix=np.random.choice([-1,1],(m,n))
+    return sketching_matrix
+
 
