@@ -50,8 +50,10 @@ def randQB_FP_auto(A, relerr,b,p,Omg):
             k=(i-1)*b+j
             break
     if not flag:
+      
         print('fail to converge')
-    return Q,B,k
+        return Q,B,E,i
+    return Q,B,E,i
     
     
 
