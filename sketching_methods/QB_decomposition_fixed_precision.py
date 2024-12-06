@@ -1,7 +1,7 @@
 import numpy as np
 import torch
 #from sketching_methods.sketching import sketch_SRTT
-def randQB_FP_auto(A, relerr,b,p,Omg):
+def randQB_FP_auto(A,relerr,b,p,Omg):
     m,n=A.shape
     Q=np.zeros((m,1))
     B=np.zeros((1,n))
@@ -50,7 +50,6 @@ def randQB_FP_auto(A, relerr,b,p,Omg):
             k=(i-1)*b+j
             break
     if not flag:
-      
         print('fail to converge')
         return Q,B,E,i
     return Q,B,E,i
