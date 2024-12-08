@@ -6,6 +6,7 @@ import numpy as np
 import problem_types.QR as QR
 import sketching_methods.sketching as sketching
 import matplotlib.pyplot as plt
+import utils.helpers as helpers
 
 
 np.random.seed(0)
@@ -42,6 +43,8 @@ def plot_sketch_size_vs_error(m = 1000, n = 50, k_range = [60, 80, 100, 125, 250
     plt.xlabel("Sketch size k")
     plt.ylabel("Error in 2-Norm")
     plt.title("Sketch size vs Error (m = 1000, n = 50)")
+
+    helpers.save_plot("sketch_size_vs_error")
     plt.show()
 
 if __name__ == "__main__":
