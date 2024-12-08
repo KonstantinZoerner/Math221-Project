@@ -1,9 +1,14 @@
+import sys
+import os
+sys.path.append(os.path.abspath('.'))
+
 import numpy as np
 import scipy
 import scipy.linalg
-import utils
+import utils.helpers
 from numpy.random import Generator as Generator
 from scipy.sparse import csc_matrix
+import numbers
 
 #def sketch_SRTT(k, p,n):
 """
@@ -52,6 +57,10 @@ from scipy.sparse import csc_matrix
     D = np.diag(np.exp(angle * 1j))
     transformed = H @ D @ A
     return transformed[np.random.choice(transformed.shape[0], k, replace=False)]'''
+
+def orthogonal_sketching_matrix(k, m):
+    F = utils.helpers.get_random_orth_matrix(k, m)
+    return np.sqrt(m/k)*F
 
 
 def sketch_orthogonal(k, A):
@@ -110,6 +119,7 @@ def uniform_sketching_matrix(m, n, low=-1, high=1):
 def rademacher_sketch_matrix(m,n):
     sketching_matrix=np.random.choice([-1,1],(m,n))
     return sketching_matrix
+
 def check_random_state(seed):
     """Turn `seed` into a `np.random.RandomState` instance.
 
