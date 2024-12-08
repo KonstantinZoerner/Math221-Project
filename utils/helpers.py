@@ -17,7 +17,6 @@ def get_random_orth_matrix(k, m):
     numpy.ndarray: A k x m orthogonal matrix.
     """
     
-
     if k < m: # orthogonal rows
         transpose = True
         A = np.random.standard_normal((m, k))
@@ -29,3 +28,10 @@ def get_random_orth_matrix(k, m):
         return Q[:m , :k].T
     return Q[:k , :m]
 
+if __name__ == "__main__":
+    print("(10, 100)", get_random_orth_matrix(10, 100).shape)
+    print("(100, 10)", get_random_orth_matrix(100, 10).shape)
+    A = get_random_orth_matrix(2, 5)
+    B = get_random_orth_matrix(5, 2)
+    print(A @ A.T)
+    print(B.T @ B)
