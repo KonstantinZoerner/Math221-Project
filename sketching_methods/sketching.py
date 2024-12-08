@@ -209,6 +209,3 @@ def cwt_sketch_matrix(m,n,rng):
     S = csc_matrix((signs, rows, cols), shape=(m, n))
     return S
 
-    skettch_matrix=scipy.linalg.cwt_matrix()
-    return skettch_matrix
-
