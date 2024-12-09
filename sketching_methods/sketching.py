@@ -10,58 +10,92 @@ from numpy.random import Generator as Generator
 from scipy.sparse import csc_matrix
 import numbers
 
-#def sketch_SRTT(k, p,n):
-"""
-    Perform a Subsampled Randomized Trigonometric Transform (SRTT) sketch of the matrix A.
 
-    Parameters:
-    k (int): The number of rows to sample from the transformed matrix.
-    A (numpy.ndarray): The input matrix to be sketched.
-
-    Returns:
-    numpy.ndarray: A k x n matrix which is a sketch of the input matrix A.
-    
-    Raises:
-    AssertionError: If k is not less than the number of rows in A."""
-    #for sname in sketches:
-     #   stype=sketches[sname]
-      #  S=stype(n,k+p,defouttype="SharedMatrix")
-       # '''m = A.shape[0]
-        #assert k < m
-        #angle = np.random.uniform(0, 2*np.pi, m)
-        #D = np.diag(np.exp(angle * 1j))
-        #FFT = np.fft.fft(D @ A)
-        #return FFT[np.random.choice(FFT.shape[0], k, replace=False)]'''
-        #return S
-#return relevant matrices that we need here
-
-'''def sketch_hadamard(k, A):
-    """
-    Perform a Hadamard transform sketch of the matrix A.
-
-    Parameters:
-    k (int): The number of rows to sample from the transformed matrix.
-    A (numpy.ndarray): The input matrix to be sketched.
-
-    Returns:
-    numpy.ndarray: A k x n matrix which is a sketch of the input matrix A.
-    
-    Raises:
-    AssertionError: If the number of rows in A is not a power of 2.
-    """
-    
-    m = A.shape[0]
-    assert np.log2(m) - np.floor(np.log2(m)) == 0
-    H = scipy.linalg.hadamard(m)
-    angle = np.random.uniform(0, 2*np.pi, m)
-    D = np.diag(np.exp(angle * 1j))
-    transformed = H @ D @ A
-    return transformed[np.random.choice(transformed.shape[0], k, replace=False)]'''
+# =============================================================================
+# Only returns the sketching matrix, not the sketched matrix
+# =============================================================================
 
 def orthogonal_sketching_matrix(k, m):
     F = utils.helpers.get_random_orth_matrix(k, m)
     return np.sqrt(m/k)*F
 
+def gaussian_sketching_matrix(k, m):
+    """
+    Generates a Gaussian sketching matrix of dimensions m x n.
+    
+    Parameters:
+    k (int): Number of rows (target dimensionality).
+    m (int): Number of columns (original dimensionality).
+    
+    Returns:
+    numpy.ndarray: Gaussian sketching matrix of shape (m, n).
+    """
+    # Create an m x n matrix with entries sampled from a standard normal distribution
+    sketching_matrix = np.random.normal(0, 1, (k, m))
+    return sketching_matrix
+
+def uniform_sketching_matrix(k, m, low=-1, high=1):
+    """
+    Generates a uniform sketching matrix of dimensions m x n.
+    
+    Parameters:
+    k (int): Number of rows (target dimensionality).
+    m (int): Number of columns (original dimensionality).
+    low (float): Lower bound of the uniform distribution.
+    high (float): Upper bound of the uniform distribution.
+    
+    Returns:
+    numpy.ndarray: Uniform sketching matrix of shape (m, n).
+    """
+    # Create an m x n matrix with entries sampled from a uniform distribution in [low, high]
+    sketching_matrix = np.random.uniform(low, high, (k, m))
+    return sketching_matrix
+
+def rademacher_sketch_matrix(k, m):
+    sketching_matrix=np.random.choice([-1,1],(k,m))
+    return sketching_matrix
+
+def SRTT_sketch_matrix(k, m, angle = None, selected_rows = None):
+    assert k < m
+
+    if angle is None:
+        angle = np.random.uniform(0, 2 * np.pi, m)
+    D = np.diag(np.exp(angle * 1j))  
+    F = (np.fft.fft(np.eye(m)))
+
+    if selected_rows is None:
+        selected_rows = np.random.choice(m, k, replace=False)
+    S = np.zeros((k, m))
+    for i, row in enumerate(selected_rows):
+        S[i, row] = 1
+
+    B = S @ F @ D
+
+    return B
+# =============================================================================
+# Only returns the sketched matrix, not the sketching matrix
+# =============================================================================
+
+def sketch_SRTT(k, A, angle = None, selected_rows = None):
+    m = A.shape[0]
+    assert k < m
+    if angle is None:
+        angle = np.random.uniform(0, 2*np.pi, m)
+    D = np.diag(np.exp(angle * 1j))
+    FFT = np.fft.fft(D @ A) 
+    if selected_rows is None:
+        selected_rows = np.random.choice(m, k, replace=False)
+    return FFT[selected_rows]
+
+def sketch_hadamard(k, A):
+    m = A.shape[0]
+    assert np.log2(m) - np.floor(np.log2(m)) == 0
+
+    H = scipy.linalg.hadamard(m)
+    angle = np.random.uniform(0, 2*np.pi, m)
+    D = np.diag(np.exp(angle * 1j))
+    transformed = H @ D @ A
+    return transformed[np.random.choice(transformed.shape[0], k, replace=False)]
 
 def sketch_orthogonal(k, A):
     """
@@ -81,44 +115,71 @@ def sketch_orthogonal(k, A):
     m = A.shape[0]
     assert k < m
     F = utils.helpers.get_random_orth_matrix(k, m)
-    return np.sqrt(m/k)*F @ A
+    return F @ A
 
-def gaussian_sketching_matrix(m, n):
+def sketch_gaussian(k, A):
     """
-    Generates a Gaussian sketching matrix of dimensions m x n.
-    
+    Perform a Gaussian transform sketch of the matrix A.
+
     Parameters:
-    m (int): Number of rows (target dimensionality).
-    n (int): Number of columns (original dimensionality).
-    
+    k (int): The number of rows to sample from the transformed matrix.
+    A (numpy.ndarray): The input matrix to be sketched.
+
     Returns:
-    numpy.ndarray: Gaussian sketching matrix of shape (m, n).
-    """
-    # Create an m x n matrix with entries sampled from a standard normal distribution
-    sketching_matrix = np.random.normal(0, 1, (m, n))
-    return sketching_matrix
-
-
-def uniform_sketching_matrix(m, n, low=-1, high=1):
-    """
-    Generates a uniform sketching matrix of dimensions m x n.
+    numpy.ndarray: A k x n matrix which is a sketch of the input matrix A.
     
+    Raises:
+    AssertionError: If k is not less than the number of rows in A.
+    """
+    
+    m = A.shape[0]
+    assert k < m
+    F = gaussian_sketching_matrix(k, m)
+    return F @ A
+
+def sketch_uniform(k, A):
+    """
+    Perform a Uniform transform sketch of the matrix A.
+
     Parameters:
-    m (int): Number of rows (target dimensionality).
-    n (int): Number of columns (original dimensionality).
-    low (float): Lower bound of the uniform distribution.
-    high (float): Upper bound of the uniform distribution.
-    
-    Returns:
-    numpy.ndarray: Uniform sketching matrix of shape (m, n).
-    """
-    # Create an m x n matrix with entries sampled from a uniform distribution in [low, high]
-    sketching_matrix = np.random.uniform(low, high, (m, n))
-    return sketching_matrix
+    k (int): The number of rows to sample from the transformed matrix.
+    A (numpy.ndarray): The input matrix to be sketched.
 
-def rademacher_sketch_matrix(m,n):
-    sketching_matrix=np.random.choice([-1,1],(m,n))
-    return sketching_matrix
+    Returns:
+    numpy.ndarray: A k x n matrix which is a sketch of the input matrix A.
+    
+    Raises:
+    AssertionError: If k is not less than the number of rows in A.
+    """
+    
+    m = A.shape[0]
+    assert k < m
+    F = uniform_sketching_matrix(k, m)
+    return F @ A
+
+def sketch_rademacher(k, A):
+    """
+    Perform a Rademacher transform sketch of the matrix A.
+
+    Parameters:
+    k (int): The number of rows to sample from the transformed matrix.
+    A (numpy.ndarray): The input matrix to be sketched.
+
+    Returns:
+    numpy.ndarray: A k x n matrix which is a sketch of the input matrix A.
+    
+    Raises:
+    AssertionError: If k is not less than the number of rows in A.
+    """
+    
+    m = A.shape[0]
+    assert k < m
+    F = rademacher_sketch_matrix(k, m)
+    return F @ A
+
+# =============================================================================
+# Other Stuff (does it belong into sketching?)
+# =============================================================================
 
 def check_random_state(seed):
     """Turn `seed` into a `np.random.RandomState` instance.
@@ -219,3 +280,19 @@ def cwt_sketch_matrix(m,n,rng):
     S = csc_matrix((signs, rows, cols), shape=(m, n))
     return S
 
+   
+
+if __name__ == "__main__":
+    m = 1000
+    n = 50
+    k = 60
+    A = np.random.standard_normal((m, n))
+
+    angle = np.random.uniform(0, 2 * np.pi, m)
+    selected_rows = np.random.choice(m, k, replace=False)
+
+    F = SRTT_sketch_matrix(k, m, angle, selected_rows)
+    As_old = sketch_SRTT(k, A, angle, selected_rows)
+    As_new = F @ A
+
+    print(np.linalg.norm(As_new - As_old))
