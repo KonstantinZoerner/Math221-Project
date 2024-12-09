@@ -1,11 +1,11 @@
 import sys
 import os
-sys.path.append(os.path.abspath('.'))
+#sys.path.append(os.path.abspath('..'))
 
 import numpy as np
 import scipy
 import scipy.linalg
-import utils.helpers
+#import utils.helpers
 from numpy.random import Generator as Generator
 from scipy.sparse import csc_matrix
 import numbers
@@ -15,9 +15,9 @@ import numbers
 # Only returns the sketching matrix, not the sketched matrix
 # =============================================================================
 
-def orthogonal_sketching_matrix(k, m):
-    F = utils.helpers.get_random_orth_matrix(k, m)
-    return np.sqrt(m/k)*F
+#def orthogonal_sketching_matrix(k, m):
+ #   F = utils.helpers.get_random_orth_matrix(k, m)
+  #  return np.sqrt(m/k)*F
 
 def gaussian_sketching_matrix(k, m):
     """
@@ -72,6 +72,15 @@ def SRTT_sketch_matrix(k, m, angle = None, selected_rows = None):
     B = S @ F @ D
 
     return B
+
+def cwt_sketch_matrix(m,n,rng):
+    rng = check_random_state(rng)
+    rows = rng_integers(rng, 0, m, n)
+    cols = np.arange(n+1)
+    signs = rng.choice([1, -1], n)
+    S = csc_matrix((signs, rows, cols), shape=(m, n))
+    return S
+
 # =============================================================================
 # Only returns the sketched matrix, not the sketching matrix
 # =============================================================================
@@ -177,9 +186,6 @@ def sketch_rademacher(k, A):
     F = rademacher_sketch_matrix(k, m)
     return F @ A
 
-# =============================================================================
-# Other Stuff (does it belong into sketching?)
-# =============================================================================
 
 def check_random_state(seed):
     """Turn `seed` into a `np.random.RandomState` instance.
@@ -272,13 +278,8 @@ def rng_integers(gen, low, high=None, size=None, dtype='int64',
 
         # exclusive
         return gen.randint(low, high=high, size=size, dtype=dtype)
-def cwt_sketch_matrix(m,n,rng):
-    rng = check_random_state(rng)
-    rows = rng_integers(rng, 0, m, n)
-    cols = np.arange(n+1)
-    signs = rng.choice([1, -1], n)
-    S = csc_matrix((signs, rows, cols), shape=(m, n))
-    return S
+    
+
 
    
 
