@@ -62,16 +62,7 @@ for i in range(10):
 
 #we first try uniform sketching mtrices
 uniform_matrices={}
-from sketching import uniform_sketching_matrix
-from QB_decomposition_fixed_precision import randQB_FP_auto
+from sketching_methods.sketching import uniform_sketching_matrix
 for i in range (10):
     uniform_matrices[str(i)]=uniform_sketching_matrix(28, len(singular_values[str(i)])+5)
-#get their QB decomposition
-rank_approximated={}
-Q_uniform={}
-B_uniform={}
-for i in range(10):
-    Q,B,k=randQB_FP_auto(train_dataset[i][0][0],0.01,4,3)
-    rank_approximated[str(i)]=k
-    Q_uniform[str(i)]=Q
-    B_uniform[str(i)]=B
+
