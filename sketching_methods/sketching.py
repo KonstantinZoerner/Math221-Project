@@ -73,9 +73,7 @@ def SRTT_sketch_matrix(k, m, angle = None, selected_rows = None):
     B = np.sqrt(m/k)*S @ F @ D
 
     return B
-<<<<<<< HEAD
 
-=======
 def leverage_score_operator(X, rank, num_samples):
     """
     Compute the leverage score sampling operator for LSST.
@@ -116,7 +114,6 @@ def cwt_sketch_matrix(m,n,rng):
     signs = rng.choice([1, -1], n)
     S = csc_matrix((signs, rows, cols), shape=(m, n))
     return S
->>>>>>> 270e4680d053bbd14cd0b03193ff9b719f3258b6
 
 # =============================================================================
 # Only returns the sketched matrix, not the sketching matrix
