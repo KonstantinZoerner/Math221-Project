@@ -1,11 +1,12 @@
 import sys
 import os
-#sys.path.append(os.path.abspath('..'))
+sys.path.append(os.path.abspath('.'))
 
 import numpy as np
 import scipy
 import scipy.linalg
-#import utils.helpers
+import utils.helpers
+from scipy.linalg import svd
 from numpy.random import Generator as Generator
 from scipy.sparse import csc_matrix
 import numbers
@@ -72,6 +73,38 @@ def SRTT_sketch_matrix(k, m, angle = None, selected_rows = None):
     B = np.sqrt(m/k)*S @ F @ D
 
     return B
+def leverage_score_operator(X, rank, num_samples):
+    """
+    Compute the leverage score sampling operator for LSST.
+    
+    Args:
+        X (numpy.ndarray): Input data matrix of size (m, n).
+        rank (int): Desired rank for approximation.
+        num_samples (int): Number of rows/columns to sample.
+        
+    Returns:
+        S (numpy.ndarray): Sampling operator matrix of size (num_samples, m).
+    """
+    # Step 1: Compute the leverage scores using SVD
+    U, _, _ = svd(X, full_matrices=False)
+    U_truncated = U[:, :rank]  # Retain top `rank` components
+    leverage_scores = np.sum(U_truncated**2, axis=1)
+    leverage_scores /= np.sum(leverage_scores)  # Normalize to sum to 1
+    
+    # Step 2: Sample rows based on leverage scores
+    sampled_indices = np.random.choice(
+        np.arange(X.shape[0]),
+        size=num_samples,
+        replace=False,
+        p=leverage_scores
+    )
+    
+    # Step 3: Construct the sampling operator
+    S = np.zeros((num_samples, X.shape[0]))
+    for i, idx in enumerate(sampled_indices):
+        S[i, idx] = 1 / np.sqrt(num_samples * leverage_scores[idx])
+    
+    return S
 
 def cwt_sketch_matrix(m,n,rng):
     rng = check_random_state(rng)
@@ -123,7 +156,7 @@ def sketch_orthogonal(k, A):
     
     m = A.shape[0]
     assert k < m
-    F = orthogonal_sketching_matrix(k, m)
+    F = utils.helpers.orthogonal_sketching_matrix(k, m)
     return F @ A
 
 def sketch_gaussian(k, A):
