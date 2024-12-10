@@ -72,6 +72,8 @@ def SRTT_sketch_matrix(k, m, angle = None, selected_rows = None):
     B = np.sqrt(m/k)*S @ F @ D
 
     return B
+
+
 # =============================================================================
 # Only returns the sketched matrix, not the sketching matrix
 # =============================================================================
@@ -85,7 +87,7 @@ def sketch_SRTT(k, A, angle = None, selected_rows = None):
     FFT = np.fft.fft(D @ A) 
     if selected_rows is None:
         selected_rows = np.random.choice(m, k, replace=False)
-    return FFT[selected_rows]
+    return np.sqrt(m/k)*FFT[selected_rows]
 
 def sketch_hadamard(k, A):
     m = A.shape[0]
