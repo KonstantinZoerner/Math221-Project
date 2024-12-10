@@ -69,7 +69,7 @@ def SRTT_sketch_matrix(k, m, angle = None, selected_rows = None):
     for i, row in enumerate(selected_rows):
         S[i, row] = 1
 
-    B = S @ F @ D
+    B = np.sqrt(m/k)*S @ F @ D
 
     return B
 
@@ -123,7 +123,7 @@ def sketch_orthogonal(k, A):
     
     m = A.shape[0]
     assert k < m
-    F = utils.helpers.get_random_orth_matrix(k, m)
+    F = orthogonal_sketching_matrix(k, m)
     return F @ A
 
 def sketch_gaussian(k, A):
