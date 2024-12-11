@@ -85,74 +85,36 @@ def SRTT_sketch_matrix(k, m, angle = None, selected_rows = None):
 
     return B
 
-def leverage_score_operator(X, rank, num_samples):
-    """
-    Compute the leverage score sampling operator for LSST.
-    
-    Args:
-        X (numpy.ndarray): Input data matrix of size (m, n).
-        rank (int): Desired rank for approximation.
-        num_samples (int): Number of rows/columns to sample.
-        
-    Returns:
-        S (numpy.ndarray): Sampling operator matrix of size (num_samples, m).
-    """
-    # Step 1: Compute the leverage scores using SVD
-    U, _, _ = svd(X, full_matrices=False)
-    U_truncated = U[:, :rank]  # Retain top `rank` components
-    leverage_scores = np.sum(U_truncated**2, axis=1)
-    leverage_scores /= np.sum(leverage_scores)  # Normalize to sum to 1
-    
-    # Step 2: Sample rows based on leverage scores
-    sampled_indices = np.random.choice(
-        np.arange(X.shape[0]),
-        size=num_samples,
-        replace=False,
-        p=leverage_scores
-    )
-    
-    # Step 3: Construct the sampling operator
-    S = np.zeros((num_samples, X.shape[0]))
-    for i, idx in enumerate(sampled_indices):
-        S[i, idx] = 1 / np.sqrt(num_samples * leverage_scores[idx])
-    
-    return S
-
-def cwt_sketch_matrix(m,n,rng):
+def cwt_sketch_matrix(k,m,rng):
+    """ checked that scaling works :) """
     rng = check_random_state(rng)
-    rows = rng_integers(rng, 0, m, n)
-    cols = np.arange(n+1)
-    signs = rng.choice([1, -1], n)
-    S = csc_matrix((signs, rows, cols), shape=(m, n))
+    rows = rng_integers(rng, 0, k, m)
+    cols = np.arange(m+1)
+    signs = rng.choice([1, -1], m)
+    S = csc_matrix((signs, rows, cols), shape=(k, m))
     return S
 
 # =============================================================================
 # Only returns the sketched matrix, not the sketching matrix
 # =============================================================================
 
-
+def sketch_CWT(k, A, rng=None):
+    # scaling correct :)
+    S = cwt_sketch_matrix(k, A.shape[0], rng)
+    return S @ A
 
 def sketch_SRFT(k, A):
-    """ checked that scaling works :) """
+    # scaling correct :)
     S = SRFT_sketch_matrix(k, A.shape[0])
     return S @ A
 
 def sketch_SRTT(k, A):
+    # scaling correct :)
     S = SRTT_sketch_matrix(k, A.shape[0])
     return S @ A
 
-def sketch_hadamard(k, A):
-    m = A.shape[0]
-    assert np.log2(m) - np.floor(np.log2(m)) == 0
-
-    H = scipy.linalg.hadamard(m)
-    angle = np.random.uniform(0, 2*np.pi, m)
-    D = np.diag(np.exp(angle * 1j))
-    transformed = H @ D @ A
-    return transformed[np.random.choice(transformed.shape[0], k, replace=False)]
-
 def sketch_orthogonal(k, A):
-    """ checked that scaling works :) """
+    # scaling correct :)
     """
     Perform an orthogonal transform sketch of the matrix A.
 
@@ -172,7 +134,19 @@ def sketch_orthogonal(k, A):
     F = orthogonal_sketching_matrix(k, m)
     return F @ A
 
+def sketch_hadamard(k, A):
+    # scaling not correct yet :(
+    m = A.shape[0]
+    assert np.log2(m) - np.floor(np.log2(m)) == 0
+
+    H = scipy.linalg.hadamard(m)
+    angle = np.random.uniform(0, 2*np.pi, m)
+    D = np.diag(np.exp(angle * 1j))
+    transformed = H @ D @ A
+    return transformed[np.random.choice(transformed.shape[0], k, replace=False)]
+
 def sketch_gaussian(k, A):
+    # scaling not correct yet :(
     """
     Perform a Gaussian transform sketch of the matrix A.
 
@@ -193,6 +167,7 @@ def sketch_gaussian(k, A):
     return F @ A
 
 def sketch_uniform(k, A):
+    # scaling not correct yet :(
     """
     Perform a Uniform transform sketch of the matrix A.
 
@@ -213,6 +188,7 @@ def sketch_uniform(k, A):
     return F @ A
 
 def sketch_rademacher(k, A):
+    # scaling not correct yet :(
     """
     Perform a Rademacher transform sketch of the matrix A.
 
@@ -232,6 +208,9 @@ def sketch_rademacher(k, A):
     F = rademacher_sketch_matrix(k, m)
     return F @ A
 
+# =============================================================================
+# Helper functions
+# =============================================================================
 
 def check_random_state(seed):
     """Turn `seed` into a `np.random.RandomState` instance.
@@ -325,7 +304,38 @@ def rng_integers(gen, low, high=None, size=None, dtype='int64',
         # exclusive
         return gen.randint(low, high=high, size=size, dtype=dtype)
     
-
+def leverage_score_operator(X, rank, num_samples):
+    """
+    Compute the leverage score sampling operator for LSST.
+    
+    Args:
+        X (numpy.ndarray): Input data matrix of size (m, n).
+        rank (int): Desired rank for approximation.
+        num_samples (int): Number of rows/columns to sample.
+        
+    Returns:
+        S (numpy.ndarray): Sampling operator matrix of size (num_samples, m).
+    """
+    # Step 1: Compute the leverage scores using SVD
+    U, _, _ = svd(X, full_matrices=False)
+    U_truncated = U[:, :rank]  # Retain top `rank` components
+    leverage_scores = np.sum(U_truncated**2, axis=1)
+    leverage_scores /= np.sum(leverage_scores)  # Normalize to sum to 1
+    
+    # Step 2: Sample rows based on leverage scores
+    sampled_indices = np.random.choice(
+        np.arange(X.shape[0]),
+        size=num_samples,
+        replace=False,
+        p=leverage_scores
+    )
+    
+    # Step 3: Construct the sampling operator
+    S = np.zeros((num_samples, X.shape[0]))
+    for i, idx in enumerate(sampled_indices):
+        S[i, idx] = 1 / np.sqrt(num_samples * leverage_scores[idx])
+    
+    return S
 
    
 
