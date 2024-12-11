@@ -16,9 +16,10 @@ import numbers
 # Only returns the sketching matrix, not the sketched matrix
 # =============================================================================
 
-#def orthogonal_sketching_matrix(k, m):
- #   F = utils.helpers.get_random_orth_matrix(k, m)
-  #  return np.sqrt(m/k)*F
+def orthogonal_sketching_matrix(k, m):
+    """ checked that scaling works :) """
+    F = utils.helpers.get_random_orth_matrix(k, m)
+    return np.sqrt(m/k)*F
 
 def gaussian_sketching_matrix(k, m):
     """
@@ -56,13 +57,23 @@ def rademacher_sketch_matrix(k, m):
     sketching_matrix=np.random.choice([-1,1],(k,m))
     return sketching_matrix
 
+def SRFT_sketch_matrix(k, m):
+    """ compare Chapter 2.5 of Randomized Linear Algebra"""
+    D = np.diag(np.random.choice([-1, 1], m))
+    F = np.sqrt(1/m)*np.fft.fft(np.eye(m))
+    R = np.zeros((k, m))
+    selected_rows = np.random.choice(m, k, replace=False)
+    for i, row in enumerate(selected_rows):
+        R[i, row] = 1
+    return np.sqrt(m/k)*R @ F @ D
+
 def SRTT_sketch_matrix(k, m, angle = None, selected_rows = None):
     assert k < m
 
     if angle is None:
         angle = np.random.uniform(0, 2 * np.pi, m)
     D = np.diag(np.exp(angle * 1j))  
-    F = (np.fft.fft(np.eye(m)))
+    F =  np.sqrt(1/m)*(np.fft.fft(np.eye(m)))
 
     if selected_rows is None:
         selected_rows = np.random.choice(m, k, replace=False)
@@ -73,6 +84,7 @@ def SRTT_sketch_matrix(k, m, angle = None, selected_rows = None):
     B = np.sqrt(m/k)*S @ F @ D
 
     return B
+
 def leverage_score_operator(X, rank, num_samples):
     """
     Compute the leverage score sampling operator for LSST.
@@ -118,16 +130,16 @@ def cwt_sketch_matrix(m,n,rng):
 # Only returns the sketched matrix, not the sketching matrix
 # =============================================================================
 
-def sketch_SRTT(k, A, angle = None, selected_rows = None):
-    m = A.shape[0]
-    assert k < m
-    if angle is None:
-        angle = np.random.uniform(0, 2*np.pi, m)
-    D = np.diag(np.exp(angle * 1j))
-    FFT = np.fft.fft(D @ A) 
-    if selected_rows is None:
-        selected_rows = np.random.choice(m, k, replace=False)
-    return FFT[selected_rows]
+
+
+def sketch_SRFT(k, A):
+    """ checked that scaling works :) """
+    S = SRFT_sketch_matrix(k, A.shape[0])
+    return S @ A
+
+def sketch_SRTT(k, A):
+    S = SRTT_sketch_matrix(k, A.shape[0])
+    return S @ A
 
 def sketch_hadamard(k, A):
     m = A.shape[0]
@@ -140,6 +152,7 @@ def sketch_hadamard(k, A):
     return transformed[np.random.choice(transformed.shape[0], k, replace=False)]
 
 def sketch_orthogonal(k, A):
+    """ checked that scaling works :) """
     """
     Perform an orthogonal transform sketch of the matrix A.
 
@@ -156,7 +169,7 @@ def sketch_orthogonal(k, A):
     
     m = A.shape[0]
     assert k < m
-    F = utils.helpers.orthogonal_sketching_matrix(k, m)
+    F = orthogonal_sketching_matrix(k, m)
     return F @ A
 
 def sketch_gaussian(k, A):
@@ -330,3 +343,22 @@ if __name__ == "__main__":
     As_new = F @ A
 
     print(np.linalg.norm(As_new - As_old))
+
+
+# =============================================================================
+# Yunkyard
+# =============================================================================
+
+
+"""
+def sketch_SRTT(k, A, angle = None, selected_rows = None):
+    m = A.shape[0]
+    assert k < m
+    if angle is None:
+        angle = np.random.uniform(0, 2*np.pi, m)
+    D = np.diag(np.exp(angle * 1j))
+    FFT = np.sqrt(1/m)*np.fft.fft(D @ A) 
+    if selected_rows is None:
+        selected_rows = np.random.choice(m, k, replace=False)
+    return np.sqrt(m/k)*FFT[selected_rows]
+"""
