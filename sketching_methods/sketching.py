@@ -12,6 +12,7 @@ from scipy.sparse import csc_matrix
 import numbers
 
 
+
 # =============================================================================
 # Only returns the sketching matrix, not the sketched matrix
 # =============================================================================
@@ -93,6 +94,26 @@ def cwt_sketch_matrix(k,m,rng):
     signs = rng.choice([1, -1], m)
     S = csc_matrix((signs, rows, cols), shape=(k, m))
     return S
+
+def hadamard_sketch_matrix(k, m):
+    assert np.log2(m).is_integer()
+    angle = np.random.uniform(0, 2*np.pi, m)
+    D = np.diag(np.exp(angle * 1j))
+    H = scipy.linalg.hadamard(m)
+    R = np.zeros((k, m))
+    selected_rows = np.random.choice(m, k, replace=False)
+    for i, row in enumerate(selected_rows):
+        R[i, row] = 1
+    return np.sqrt(m/k)*R @ H @ D
+
+sketching_matricies_dict = {"Orthogonal": orthogonal_sketching_matrix, 
+                            "Gaussian": gaussian_sketching_matrix,
+                            "Uniform": uniform_sketching_matrix,
+                            "Rademacher": rademacher_sketch_matrix,
+                            "SRFT": SRFT_sketch_matrix,
+                            "SRTT": SRTT_sketch_matrix,
+                            "CWT": cwt_sketch_matrix,
+                            "Hadamard": hadamard_sketch_matrix}
 
 # =============================================================================
 # Only returns the sketched matrix, not the sketching matrix
@@ -208,6 +229,14 @@ def sketch_rademacher(k, A):
     F = rademacher_sketch_matrix(k, m)
     return F @ A
 
+sketching_functions_dict = {"Orthogonal": sketch_orthogonal, 
+                            "Gaussian": sketch_gaussian,
+                            "Uniform": sketch_uniform,
+                            "Rademacher": sketch_rademacher,
+                            "SRFT": sketch_SRFT,
+                            "SRTT": sketch_SRTT,
+                            "CWT": sketch_CWT,
+                            "Hadamard": sketch_hadamard}
 # =============================================================================
 # Helper functions
 # =============================================================================
