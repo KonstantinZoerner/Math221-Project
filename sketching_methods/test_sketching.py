@@ -9,7 +9,7 @@ import scipy.linalg
 import matplotlib.pyplot as plt
 
 ratio = []
-loops = 1000
+loops = 200
 for i in range(loops):
     m = 256
     n = 200
@@ -17,7 +17,7 @@ for i in range(loops):
     print(i)
     A = np.random.standard_normal((m, n))
 
-    As = sketching.sketch_uniform(k, A)
+    As = sketching.sketch_hadamard(k, A)
     x = np.random.standard_normal(n)
 
     Ax_norm2 = np.linalg.norm(A @ x)**2

@@ -27,17 +27,10 @@ def compute_sketch_size_vs_error(m = 1000, n = 50, k_range = [60, 80, 100, 125, 
     results /= loops
     return results
 
-def plot_sketch_size_vs_error(m = 1000, n = 50, k_range = [60, 80, 100, 125, 250, 500], loops = 5):
-    results_orth = compute_sketch_size_vs_error(m, n, k_range, loops, sketching.orthogonal_sketching_matrix)
-    results_gaussian = compute_sketch_size_vs_error(m, n, k_range, loops, sketching.gaussian_sketching_matrix)
-    #results_hadamard = compute_sketch_size_vs_error(m, n, k_range, loops, sketching.hadamard_sketch_matrix)
-    results_uniform = compute_sketch_size_vs_error(m, n, k_range, loops, sketching.uniform_sketching_matrix)
-    #results_SRTT = compute_sketch_size_vs_error(m, n, k_range, loops, sketching.sketch_SRTT)
-    plt.plot(k_range, results_orth, label="Orthogonal")
-    plt.plot(k_range, results_gaussian, label="Gaussian")
-    #plt.plot(k_range, results_hadamard, label="Hadamard")
-    plt.plot(k_range, results_uniform, label="Uniform")
-    #plt.plot(k_range, results_SRTT, label="SRTT")
+def plot_sketch_size_vs_error(m = 1000, n = 50, k_range = [60, 80, 100, 125, 250, 500], loops = 5, sketching_matrix_function_dict = {"Orthogonal": sketching.orthogonal_sketching_matrix, "Gaussian": sketching.gaussian_sketching_matrix, "Hadamard": sketching.hadamard_sketch_matrix, "Uniform": sketching.uniform_sketching_matrix, "SRTT": sketching.sketch_SRTT}):
+    for key in sketching_matrix_function_dict:
+        results = compute_sketch_size_vs_error(m, n, k_range, loops, sketching_matrix_function_dict[key])
+        plt.plot(k_range, results, label=key)
     plt.legend()
 
     plt.xlabel("Sketch size k")
@@ -49,4 +42,9 @@ def plot_sketch_size_vs_error(m = 1000, n = 50, k_range = [60, 80, 100, 125, 250
 
 if __name__ == "__main__":
     k_range = range(60, 500, 20)
+    sketching_matrix_function_dict = {"Orthogonal": sketching.orthogonal_sketching_matrix, 
+                                      "Gaussian": sketching.gaussian_sketching_matrix, 
+                                      "Hadamard": sketching.hadamard_sketch_matrix, 
+                                      "Uniform": sketching.uniform_sketching_matrix, 
+                                      "SRTT": sketching.sketch_SRTT}
     plot_sketch_size_vs_error(k_range = k_range)
