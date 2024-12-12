@@ -15,6 +15,7 @@ np.random.seed(0)
 def compute_sketch_size_vs_error(m = 1000, n = 50, k_range = [60, 80, 100, 125, 250, 500], loops = 20, sketching_matrix_function = sketching.orthogonal_sketching_matrix):
     results = np.zeros(len(k_range))
     for i in range(loops):
+        print("Itteration:", i)
         for k_index, k in enumerate(k_range):
             A = np.random.standard_normal((m, n))
             b = np.random.standard_normal(m)
@@ -27,8 +28,9 @@ def compute_sketch_size_vs_error(m = 1000, n = 50, k_range = [60, 80, 100, 125, 
     results /= loops
     return results
 
-def plot_sketch_size_vs_error(m = 1000, n = 50, k_range = [60, 80, 100, 125, 250, 500], loops = 5, sketching_matrix_function_dict = {"Orthogonal": sketching.orthogonal_sketching_matrix, "Gaussian": sketching.gaussian_sketching_matrix, "Hadamard": sketching.hadamard_sketch_matrix, "Uniform": sketching.uniform_sketching_matrix, "SRTT": sketching.sketch_SRTT}):
+def plot_sketch_size_vs_error(m = 1024, n = 50, k_range = [60, 80, 100, 125, 250, 500], loops = 20, sketching_matrix_function_dict = sketching.sketching_matricies_dict):
     for key in sketching_matrix_function_dict:
+        print(key)
         results = compute_sketch_size_vs_error(m, n, k_range, loops, sketching_matrix_function_dict[key])
         plt.plot(k_range, results, label=key)
     plt.legend()
@@ -42,9 +44,5 @@ def plot_sketch_size_vs_error(m = 1000, n = 50, k_range = [60, 80, 100, 125, 250
 
 if __name__ == "__main__":
     k_range = range(60, 500, 20)
-    sketching_matrix_function_dict = {"Orthogonal": sketching.orthogonal_sketching_matrix, 
-                                      "Gaussian": sketching.gaussian_sketching_matrix, 
-                                      "Hadamard": sketching.hadamard_sketch_matrix, 
-                                      "Uniform": sketching.uniform_sketching_matrix, 
-                                      "SRTT": sketching.sketch_SRTT}
     plot_sketch_size_vs_error(k_range = k_range)
+    # plot_sketch_size_vs_error()

@@ -86,7 +86,7 @@ def SRTT_sketch_matrix(k, m, angle = None, selected_rows = None):
 
     return B
 
-def cwt_sketch_matrix(k,m,rng):
+def cwt_sketch_matrix(k,m,rng=None):
     """ checked that scaling works :) """
     rng = check_random_state(rng)
     rows = rng_integers(rng, 0, k, m)
@@ -106,6 +106,15 @@ def hadamard_sketch_matrix(k, m):
         R[i, row] = 1
     return np.sqrt(m/k)*R @ H @ D
 
+def sparse_sign_embedding_sketch_matrix(k, m, zeta = 8):
+    # scaling correct :)
+    S = np.zeros((k, m))
+    for i in range(m):
+        for j in np.random.choice(range(k), zeta, replace=False):
+            S[j, i] = np.random.choice([-1, 1])
+    return 1/np.sqrt(zeta)*S
+
+   
 sketching_matricies_dict = {"Orthogonal": orthogonal_sketching_matrix, 
                             "Gaussian": gaussian_sketching_matrix,
                             "Uniform": uniform_sketching_matrix,
@@ -113,7 +122,10 @@ sketching_matricies_dict = {"Orthogonal": orthogonal_sketching_matrix,
                             "SRFT": SRFT_sketch_matrix,
                             "SRTT": SRTT_sketch_matrix,
                             "CWT": cwt_sketch_matrix,
-                            "Hadamard": hadamard_sketch_matrix}
+                            "Hadamard": hadamard_sketch_matrix, 
+                            "Sparse Sign Embedding": sparse_sign_embedding_sketch_matrix}
+
+
 
 # =============================================================================
 # Only returns the sketched matrix, not the sketching matrix
@@ -229,6 +241,11 @@ def sketch_rademacher(k, A):
     F = rademacher_sketch_matrix(k, m)
     return F @ A
 
+def sketch_sparse_sign_embedding(k, A, zeta = 8):
+    # scaling correct :)
+    S = sparse_sign_embedding_sketch_matrix(k, A.shape[0], zeta)
+    return S @ A
+
 sketching_functions_dict = {"Orthogonal": sketch_orthogonal, 
                             "Gaussian": sketch_gaussian,
                             "Uniform": sketch_uniform,
@@ -236,7 +253,14 @@ sketching_functions_dict = {"Orthogonal": sketch_orthogonal,
                             "SRFT": sketch_SRFT,
                             "SRTT": sketch_SRTT,
                             "CWT": sketch_CWT,
-                            "Hadamard": sketch_hadamard}
+                            "Hadamard": sketch_hadamard, 
+                            "Sparse Sign Embedding": sketch_sparse_sign_embedding}
+
+sketching_functions_dict_correct_scaling = {"Orthogonal": sketch_orthogonal,
+                                            "CWT": sketch_CWT,
+                                            "SRFT": sketch_SRFT,
+                                            "SRTT": sketch_SRTT,
+                                            "Sparse Sign Embedding": sketch_sparse_sign_embedding}
 # =============================================================================
 # Helper functions
 # =============================================================================
@@ -369,7 +393,7 @@ def leverage_score_operator(X, rank, num_samples):
    
 
 if __name__ == "__main__":
-    m = 1000
+    m = 1024
     n = 50
     k = 60
     A = np.random.standard_normal((m, n))

@@ -24,22 +24,13 @@ def compute_sketch_size_vs_distortion(m = 1000, n = 50, k_range = [60, 80, 100, 
     results /= loops
     return results
 
-def plot_sketch_size_vs_distortion(m = 1024, n = 50, k_range = [60, 80, 100, 125, 250, 500], loops = 5):
-    results_orth = compute_sketch_size_vs_distortion(m, n, k_range, loops, sketching.sketch_orthogonal)
-    results_SRFT = compute_sketch_size_vs_distortion(m, n, k_range, loops, sketching.sketch_SRFT)
-    results_SRTT = compute_sketch_size_vs_distortion(m, n, k_range, loops, sketching.sketch_SRTT)
-    #results_gaussian = compute_sketch_size_vs_distortion(m, n, k_range, loops, sketching.sketch_gaussian)
-    #results_hadamard = compute_sketch_size_vs_distortion(m, n, k_range, loops, sketching.sketch_hadamard)
-    #results_uniform = compute_sketch_size_vs_distortion(m, n, k_range, loops, sketching.sketch_uniform)
-    #results_SRTT = compute_sketch_size_vs_distortion(m, n, k_range, loops, sketching.sketch_SRTT)
-    plt.plot(k_range, results_orth, label="Orthogonal")
-    #plt.plot(k_range, results_gaussian, label="Gaussian")
-    #plt.plot(k_range, results_hadamard, label="Hadamard")
-    #plt.plot(k_range, results_uniform, label="Uniform")
-    plt.plot(k_range, results_SRTT, label="SRTT")
-    plt.plot(k_range, results_SRFT, label="SRFT")
-    plt.legend()
+def plot_sketch_size_vs_distortion(m = 1024, n = 50, k_range = [60, 80, 100, 125, 250, 500], loops = 5, sketching_function_dict = sketching.sketching_functions_dict_correct_scaling):
+    for key in sketching_function_dict:
+        print(key)
+        results = compute_sketch_size_vs_distortion(m, n, k_range, loops, sketching_function_dict[key])
+        plt.plot(k_range, results, label=key)
 
+    plt.legend()
     plt.xlabel("Sketch size k")
     plt.ylabel("Distortion")
     plt.title(f"Sketch size vs distortion (m = {m}, n = {n})")

@@ -17,7 +17,7 @@ for i in range(loops):
     print(i)
     A = np.random.standard_normal((m, n))
 
-    As = sketching.sketch_hadamard(k, A)
+    As = sketching.sketch_sparse_sign_embedding(k, A)
     x = np.random.standard_normal(n)
 
     Ax_norm2 = np.linalg.norm(A @ x)**2
