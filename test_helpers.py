@@ -1,7 +1,7 @@
 import unittest
 import numpy as np
 from numpy.testing import assert_almost_equal
-from utils.helpers import get_random_orth_matrix
+from utilities.helpers import get_random_orth_matrix
 
 class TestHelpers(unittest.TestCase):
 
