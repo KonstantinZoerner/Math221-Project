@@ -15,7 +15,7 @@ def draw_relative_spread(sketching_functions_dict):
         print(key)
         results = compute_relative_spread(sketching_functions_dict[key])
         data[key] = results
-    draw_violin_plot(data)
+    # draw_violin_plot(data)
     draw_box_plot(data)
     
 
@@ -49,10 +49,10 @@ def draw_box_plot(data):
         plt.scatter(x, val, alpha=0.4, s=3)
     
     # plt.rcParams['text.usetex'] = True
-    plt.xticks(rotation=90)
+    plt.xticks(rotation=45)
     plt.xlabel('Sketching Methods')
     plt.ylabel('Relative norm squared')
-    plt.title('Box Plot of Relative Variance for Different Sketching Methods')
+    plt.title('Change of Relative Norms for Different Sketching Methods')
 
     helpers.save_plot("relative_spread_box_plot")
     plt.show()

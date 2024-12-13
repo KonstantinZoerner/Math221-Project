@@ -2,10 +2,12 @@ import sys
 import os
 sys.path.append(os.path.abspath('.'))
 
+import utils.helpers
+
 import numpy as np
 import scipy
 import scipy.linalg
-import utils.helpers
+
 from scipy.linalg import svd
 from numpy.random import Generator as Generator
 from scipy.sparse import csc_matrix
@@ -22,6 +24,7 @@ def orthogonal_sketching_matrix(k, m):
     F = utils.helpers.get_random_orth_matrix(k, m)
     return np.sqrt(m/k)*F
 
+# iid sketching
 def gaussian_sketching_matrix(k, m):
     """
     Generates a Gaussian sketching matrix of dimensions m x n.
@@ -55,10 +58,12 @@ def uniform_sketching_matrix(k, m, low=-1, high=1):
     return sketching_matrix
 
 def rademacher_sketch_matrix(k, m):
+    "iid in {-1, 1}"
     sketching_matrix=np.random.choice([-1,1],(k,m))
     return sketching_matrix
 
-def SRFT_sketch_matrix(k, m):
+# trigonemtric
+def SRFT_real_sketch_matrix(k, m):
     """ compare Chapter 2.5 of Randomized Linear Algebra"""
     D = np.diag(np.random.choice([-1, 1], m))
     F = np.sqrt(1/m)*np.fft.fft(np.eye(m))
@@ -68,7 +73,7 @@ def SRFT_sketch_matrix(k, m):
         R[i, row] = 1
     return np.sqrt(m/k)*R @ F @ D
 
-def SRTT_sketch_matrix(k, m, angle = None, selected_rows = None):
+def SRFT_complex_sketch_matrix(k, m, angle = None, selected_rows = None):
     assert k < m
 
     if angle is None:
@@ -86,15 +91,6 @@ def SRTT_sketch_matrix(k, m, angle = None, selected_rows = None):
 
     return B
 
-def cwt_sketch_matrix(k,m,rng=None):
-    """ checked that scaling works :) """
-    rng = check_random_state(rng)
-    rows = rng_integers(rng, 0, k, m)
-    cols = np.arange(m+1)
-    signs = rng.choice([1, -1], m)
-    S = csc_matrix((signs, rows, cols), shape=(k, m))
-    return S
-
 def hadamard_sketch_matrix(k, m):
     assert np.log2(m).is_integer()
     angle = np.random.uniform(0, 2*np.pi, m)
@@ -105,6 +101,16 @@ def hadamard_sketch_matrix(k, m):
     for i, row in enumerate(selected_rows):
         R[i, row] = 1
     return np.sqrt(m/k)*R @ H @ D
+
+# sparse sketching
+def cwt_sketch_matrix(k,m,rng=None):
+    """ checked that scaling works :) """
+    rng = check_random_state(rng)
+    rows = rng_integers(rng, 0, k, m)
+    cols = np.arange(m+1)
+    signs = rng.choice([1, -1], m)
+    S = csc_matrix((signs, rows, cols), shape=(k, m))
+    return S
 
 def sparse_sign_embedding_sketch_matrix(k, m, zeta = 8):
     # scaling correct :)
@@ -119,10 +125,10 @@ sketching_matricies_dict = {"Orthogonal": orthogonal_sketching_matrix,
                             "Gaussian": gaussian_sketching_matrix,
                             "Uniform": uniform_sketching_matrix,
                             "Rademacher": rademacher_sketch_matrix,
-                            "SRFT": SRFT_sketch_matrix,
-                            "SRTT": SRTT_sketch_matrix,
-                            "CWT": cwt_sketch_matrix,
+                            "SRFT (real)": SRFT_real_sketch_matrix,
+                            "SRTT (complex)": SRFT_complex_sketch_matrix,
                             "Hadamard": hadamard_sketch_matrix, 
+                            "CWT": cwt_sketch_matrix,
                             "Sparse Sign Embedding": sparse_sign_embedding_sketch_matrix}
 
 
@@ -136,14 +142,14 @@ def sketch_CWT(k, A, rng=None):
     S = cwt_sketch_matrix(k, A.shape[0], rng)
     return S @ A
 
-def sketch_SRFT(k, A):
+def sketch_SRFT_real(k, A):
     # scaling correct :)
-    S = SRFT_sketch_matrix(k, A.shape[0])
+    S = SRFT_real_sketch_matrix(k, A.shape[0])
     return S @ A
 
-def sketch_SRTT(k, A):
+def sketch_SRFT_complex(k, A):
     # scaling correct :)
-    S = SRTT_sketch_matrix(k, A.shape[0])
+    S = SRFT_complex_sketch_matrix(k, A.shape[0])
     return S @ A
 
 def sketch_orthogonal(k, A):
@@ -250,16 +256,16 @@ sketching_functions_dict = {"Orthogonal": sketch_orthogonal,
                             "Gaussian": sketch_gaussian,
                             "Uniform": sketch_uniform,
                             "Rademacher": sketch_rademacher,
-                            "SRFT": sketch_SRFT,
-                            "SRTT": sketch_SRTT,
-                            "CWT": sketch_CWT,
+                            "SRFT (real)": sketch_SRFT_real,
+                            "SRTT (complex)": sketch_SRFT_complex,
                             "Hadamard": sketch_hadamard, 
+                            "CWT": sketch_CWT,
                             "Sparse Sign Embedding": sketch_sparse_sign_embedding}
 
 sketching_functions_dict_correct_scaling = {"Orthogonal": sketch_orthogonal,
                                             "CWT": sketch_CWT,
-                                            "SRFT": sketch_SRFT,
-                                            "SRTT": sketch_SRTT,
+                                            "SRFT (real)": sketch_SRFT_real,
+                                            "SRTT (complex)": sketch_SRFT_complex,
                                             "Sparse Sign Embedding": sketch_sparse_sign_embedding}
 # =============================================================================
 # Helper functions
@@ -401,8 +407,8 @@ if __name__ == "__main__":
     angle = np.random.uniform(0, 2 * np.pi, m)
     selected_rows = np.random.choice(m, k, replace=False)
 
-    F = SRTT_sketch_matrix(k, m, angle, selected_rows)
-    As_old = sketch_SRTT(k, A, angle, selected_rows)
+    F = SRFT_complex_sketch_matrix(k, m, angle, selected_rows)
+    As_old = sketch_SRFT_complex(k, A, angle, selected_rows)
     As_new = F @ A
 
     print(np.linalg.norm(As_new - As_old))
