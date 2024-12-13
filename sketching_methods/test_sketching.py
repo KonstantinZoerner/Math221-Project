@@ -11,13 +11,13 @@ import matplotlib.pyplot as plt
 ratio = []
 loops = 200
 for i in range(loops):
-    m = 256
-    n = 200
+    m = 1024
+    n = 800
     k = 50
     print(i)
     A = np.random.standard_normal((m, n))
 
-    As = sketching.sketch_sparse_sign_embedding(k, A)
+    As = sketching.sketch_gaussian(k, A)
     x = np.random.standard_normal(n)
 
     Ax_norm2 = np.linalg.norm(A @ x)**2

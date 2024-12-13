@@ -35,28 +35,28 @@ def matmul_sketch_sketching_function(A, B, k, sketching_function):
     Bs = sketching_function(k, B)
     return As.T @ Bs
 
-if __name__ == "__main__":
-    np.random.seed(0)
-    m = 1000
-    n = 500
-    p = 200
-    k = 50
-    
-    # A = scipy.sparse.random(m, n, density=0.01, format='csr').toarray()
-    # B = scipy.sparse.random(p, n, density=0.01, format='csr').toarray()
-        # difference_function = np.linalg.norm(C_exact - C_sketch_sketching_function, ord='fro')
-    # print("difference_function", difference_function)
-    # C_sketch_sketching_function = matmul_sketch_sketching_function(A, B, k, sketching.sketch_sparse_sign_embedding)
-
+def compute_rel_error(k = 50, m = 1024, n = 500, p = 200, sketching_matrix_function = sketching.orthogonal_sketching_matrix):
     A = np.random.rand(n, m)
     B = np.random.rand(n, p)
 
     C_exact = matmul_exact(A, B)
-    C_sketch_sketching_matrix = matmul_sketch_sketching_matrix(A, B, k, sketching.orthogonal_sketching_matrix)
+    C_sketch_sketching_matrix = matmul_sketch_sketching_matrix(A, B, k, sketching_matrix_function)
     difference_matrix = np.linalg.norm(C_exact - C_sketch_sketching_matrix, ord='fro')
     C_norm = np.linalg.norm(C_exact, ord='fro')
+    rel_error = difference_matrix / (C_norm*np.linalg.norm(A, ord='fro')* np.linalg.norm(B, ord='fro'))
+    return rel_error
 
 
-    print("relative_error_matrix", difference_matrix / C_norm)
+
+
+
+
+if __name__ == "__main__":
+    np.random.seed(0)
+    for k in range(10, 200, 10):
+        print(compute_rel_error(sketching_matrix_function=sketching.orthogonal_sketching_matrix, k = k))
+
+
+
 
     

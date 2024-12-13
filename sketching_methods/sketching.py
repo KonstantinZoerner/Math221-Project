@@ -19,6 +19,7 @@ import numbers
 # =============================================================================
 # Only returns the sketching matrix, not the sketched matrix
 # =============================================================================
+
 def JLT_sketching_matrix(k,m):
     JLT_matrix=calculate_R(m,k,s=1,random_seed=21,swr=True)
     return JLT_matrix
@@ -42,7 +43,7 @@ def gaussian_sketching_matrix(k, m):
     numpy.ndarray: Gaussian sketching matrix of shape (m, n).
     """
     # Create an m x n matrix with entries sampled from a standard normal distribution
-    sketching_matrix = np.random.normal(0, 1, (k, m))
+    sketching_matrix = 1/np.sqrt(k)*np.random.normal(0, 1, (k, m))
     return sketching_matrix
 
 def uniform_sketching_matrix(k, m, low=-1, high=1):
@@ -131,10 +132,17 @@ sketching_matricies_dict = {"Orthogonal": orthogonal_sketching_matrix,
                             "Uniform": uniform_sketching_matrix,
                             "Rademacher": rademacher_sketch_matrix,
                             "SRFT (real)": SRFT_real_sketch_matrix,
-                            "SRTT (complex)": SRFT_complex_sketch_matrix,
+                            "SRFT (complex)": SRFT_complex_sketch_matrix,
                             "Hadamard": hadamard_sketch_matrix, 
                             "CWT": cwt_sketch_matrix,
                             "SSE": sparse_sign_embedding_sketch_matrix}
+
+sketching_matricies_dict_correct_scaling = {"Orthogonal": orthogonal_sketching_matrix,
+                                            "Gaussian": gaussian_sketching_matrix,
+                                            "CWT": cwt_sketch_matrix,
+                                            "SRFT (real)": SRFT_real_sketch_matrix,
+                                            "SRFT (complex)": SRFT_complex_sketch_matrix,
+                                            "SSE": sparse_sign_embedding_sketch_matrix}
 
 
 
@@ -262,15 +270,16 @@ sketching_functions_dict = {"Orthogonal": sketch_orthogonal,
                             "Uniform": sketch_uniform,
                             "Rademacher": sketch_rademacher,
                             "SRFT (real)": sketch_SRFT_real,
-                            "SRTT (complex)": sketch_SRFT_complex,
+                            "SRFT (complex)": sketch_SRFT_complex,
                             "Hadamard": sketch_hadamard, 
                             "CWT": sketch_CWT,
                             "SSE": sketch_sparse_sign_embedding}
 
 sketching_functions_dict_correct_scaling = {"Orthogonal": sketch_orthogonal,
+                                            "Gaussian": sketch_gaussian,
                                             "CWT": sketch_CWT,
                                             "SRFT (real)": sketch_SRFT_real,
-                                            "SRTT (complex)": sketch_SRFT_complex,
+                                            "SRFT (complex)": sketch_SRFT_complex,
                                             "SSE": sketch_sparse_sign_embedding}
 # =============================================================================
 # Helper functions
@@ -417,22 +426,3 @@ if __name__ == "__main__":
     As_new = F @ A
 
     print(np.linalg.norm(As_new - As_old))
-
-
-# =============================================================================
-# Yunkyard
-# =============================================================================
-
-
-"""
-def sketch_SRTT(k, A, angle = None, selected_rows = None):
-    m = A.shape[0]
-    assert k < m
-    if angle is None:
-        angle = np.random.uniform(0, 2*np.pi, m)
-    D = np.diag(np.exp(angle * 1j))
-    FFT = np.sqrt(1/m)*np.fft.fft(D @ A) 
-    if selected_rows is None:
-        selected_rows = np.random.choice(m, k, replace=False)
-    return np.sqrt(m/k)*FFT[selected_rows]
-"""

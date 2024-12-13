@@ -3,7 +3,9 @@ import numpy as np
 from numpy.linalg import svd, norm
 from numpy.linalg import qr
 import matplotlib.pyplot as plt
-from sketching_methods.sketching import JLT_sketching_matrix, orthogonal_sketching_matrix,gaussian_sketching_matrix,uniform_sketching_matrix,rademacher_sketch_matrix,SRFT_sketch_matrix,cwt_sketch_matrix,SRTT_sketch_matrix,hadamard_sketch_matrix
+from sketching_methods.sketching import orthogonal_sketching_matrix,gaussian_sketching_matrix,uniform_sketching_matrix,rademacher_sketch_matrix,cwt_sketch_matrix
+
+
 def randomized_svd(A, k, sketching_matrix_func,n_iter,sketch_size):
      # Step 1: Random sampling
     n=A.shape[1]
@@ -54,8 +56,9 @@ if __name__ == "__main__":
         #"SRTT": SRTT_sketch_matrix,
         "CWT": cwt_sketch_matrix,
         #"Hadamard": hadamard_sketch_matrix, 
-        'JLT':JLT_sketching_matrix,
+        #'JLT':JLT_sketching_matrix,
     }
+
     n_iter=2
     # Evaluate each method
     # Evaluate each method for different sketch sizes

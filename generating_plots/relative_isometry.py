@@ -29,7 +29,7 @@ def compute_relative_spread(sketching_function, loops = 1000):
         As = sketching_function(k, A)
         x = np.random.standard_normal(n)
         #Ax_norm2 = np.linalg.norm(A @ x)**2
-        Asx_norm2 = np.linalg.norm(As @ x)**2
+        Asx_norm2 = np.linalg.norm(As @ x)
         
         results[i] = Asx_norm2
     results /= np.mean(results)
@@ -51,7 +51,7 @@ def draw_box_plot(data):
     # plt.rcParams['text.usetex'] = True
     plt.xticks(rotation=45)
     plt.xlabel('Sketching Methods')
-    plt.ylabel('Relative norm squared')
+    plt.ylabel('Relative norm')
     plt.title('Change of Relative Norms for Different Sketching Methods')
 
     helpers.save_plot("relative_spread_box_plot")
@@ -74,7 +74,7 @@ def draw_violin_plot(data):
     plt.violinplot(vals, showmeans=False, showmedians=True)
     plt.xticks(range(1, len(names) + 1), names, rotation=90)
     plt.xlabel('Sketching Methods')
-    plt.ylabel('Relative norm squared')
+    plt.ylabel('Relative norm')
     plt.title('Box Plot of Relative Variance for Different Sketching Methods')
 
     helpers.save_plot("relative_spread_violin_plot")
