@@ -6,7 +6,7 @@ import numpy as np
 import problem_types.QR as QR
 import sketching_methods.sketching as sketching
 import matplotlib.pyplot as plt
-import utils.helpers as helpers
+import utilities.helpers as helpers
 import problem_types.distortion as distortion
 
 def draw_relative_spread(sketching_functions_dict):

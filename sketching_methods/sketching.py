@@ -2,7 +2,7 @@ import sys
 import os
 sys.path.append(os.path.abspath('.'))
 
-import utils.helpers
+import utilities.helpers
 
 import numpy as np
 import scipy
@@ -21,7 +21,7 @@ import numbers
 
 def orthogonal_sketching_matrix(k, m):
     """ checked that scaling works :) """
-    F = utils.helpers.get_random_orth_matrix(k, m)
+    F = utilities.helpers.get_random_orth_matrix(k, m)
     return np.sqrt(m/k)*F
 
 # iid sketching
@@ -129,7 +129,7 @@ sketching_matricies_dict = {"Orthogonal": orthogonal_sketching_matrix,
                             "SRTT (complex)": SRFT_complex_sketch_matrix,
                             "Hadamard": hadamard_sketch_matrix, 
                             "CWT": cwt_sketch_matrix,
-                            "Sparse Sign Embedding": sparse_sign_embedding_sketch_matrix}
+                            "SSE": sparse_sign_embedding_sketch_matrix}
 
 
 
@@ -260,13 +260,13 @@ sketching_functions_dict = {"Orthogonal": sketch_orthogonal,
                             "SRTT (complex)": sketch_SRFT_complex,
                             "Hadamard": sketch_hadamard, 
                             "CWT": sketch_CWT,
-                            "Sparse Sign Embedding": sketch_sparse_sign_embedding}
+                            "SSE": sketch_sparse_sign_embedding}
 
 sketching_functions_dict_correct_scaling = {"Orthogonal": sketch_orthogonal,
                                             "CWT": sketch_CWT,
                                             "SRFT (real)": sketch_SRFT_real,
                                             "SRTT (complex)": sketch_SRFT_complex,
-                                            "Sparse Sign Embedding": sketch_sparse_sign_embedding}
+                                            "SSE": sketch_sparse_sign_embedding}
 # =============================================================================
 # Helper functions
 # =============================================================================
