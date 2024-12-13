@@ -11,6 +11,7 @@ import scipy.linalg
 from scipy.linalg import svd
 from numpy.random import Generator as Generator
 from scipy.sparse import csc_matrix
+from sketching_methods.jlt.linearMapping import calculate_R
 import numbers
 
 
@@ -18,6 +19,10 @@ import numbers
 # =============================================================================
 # Only returns the sketching matrix, not the sketched matrix
 # =============================================================================
+def JLT_sketching_matrix(k,m):
+    JLT_matrix=calculate_R(m,k,s=1,random_seed=21,swr=True)
+    return JLT_matrix
+
 
 def orthogonal_sketching_matrix(k, m):
     """ checked that scaling works :) """
