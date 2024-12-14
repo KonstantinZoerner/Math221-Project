@@ -53,7 +53,7 @@ def plot_sketch_size_vs_error(m = 1024, n = 50, k_range = [60, 80, 100, 125, 250
 
     plt.xlabel("Sketch size k")
     plt.ylabel("Relative Error in 2-Norm")
-    plt.title(r"Least squares for $A \in \mathbb{R}^{1024 \times 50}, b \in \mathbb{R}^{1024}$")
+    plt.title(r"Least squares for $A \in \mathbb{R}^{" + str(m) + r"\times " + str(n) + r"}, b \in \mathbb{R}^{" + str(m) + r"}$")
 
     helpers.save_plot(f"{title}_loops{loops}_m{m}_n{n}")
     plt.show()
@@ -69,12 +69,24 @@ def plot_sketch_size_vs_error_hilbert(loops = 20):
                             "SRFT (real)": sketching.SRFT_real_sketch_matrix,
                             "SRFT (complex)": sketching.SRFT_complex_sketch_matrix,
                             "Hadamard": sketching.hadamard_sketch_matrix, 
-                            #"CWT": sketching.cwt_sketch_matrix,
+                            # "CWT": sketching.cwt_sketch_matrix,
                             "SSE": sketching.sparse_sign_embedding_sketch_matrix}
     plot_sketch_size_vs_error(A_generator=genrate_A.generate_hilbert, sketching_matrix_function_dict=sketching_matrix_functions, title="qr_err_vs_k_hilbert", m=m, n=n, k_range=k_range, loops=loops, SVD=True)
+
+def plot_sketch_size_vs_error_singular_spread(loops = 20, m = 256, n = 20, k_range = range(40, 100, 5)):
+    sketching_matrix_functions = sketching_matricies_dict = {"Orthogonal": sketching.orthogonal_sketching_matrix, 
+                            "Gaussian": sketching.gaussian_sketching_matrix,
+                            "Uniform": sketching.uniform_sketching_matrix,
+                            "Rademacher": sketching.rademacher_sketch_matrix,
+                            "SRFT (real)": sketching.SRFT_real_sketch_matrix,
+                            "SRFT (complex)": sketching.SRFT_complex_sketch_matrix,
+                            "Hadamard": sketching.hadamard_sketch_matrix, 
+                            # "CWT": sketching.cwt_sketch_matrix,
+                            "SSE": sketching.sparse_sign_embedding_sketch_matrix}
+    plot_sketch_size_vs_error(A_generator=genrate_A.generate_spread_singular_values, sketching_matrix_function_dict=sketching_matrix_functions, title="qr_err_vs_k_singular_spread", m=m, n=n, k_range=k_range, loops=loops, SVD=True)
 
 if __name__ == "__main__":
     #k_range = range(100, 500, 20)
     # plot_sketch_size_vs_error(k_range = k_range)
     #plot_sketch_size_vs_error(A_generator=genrate_A.generate_hilbert)
-    plot_sketch_size_vs_error_hilbert()
+    plot_sketch_size_vs_error_singular_spread(loops = 10, m = 1024, n = 100, k_range = range(150, 500, 20))
