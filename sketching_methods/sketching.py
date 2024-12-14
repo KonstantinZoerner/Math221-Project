@@ -11,7 +11,6 @@ import scipy.linalg
 from scipy.linalg import svd
 from numpy.random import Generator as Generator
 from scipy.sparse import csc_matrix
-from sketching_methods.jlt.linearMapping import calculate_R
 import numbers
 
 
@@ -20,6 +19,7 @@ import numbers
 # Only returns the sketching matrix, not the sketched matrix
 # =============================================================================
 
+from sketching_methods.jlt.linearMapping import calculate_R
 def JLT_sketching_matrix(k,m):
     JLT_matrix=calculate_R(m,k,s=1,random_seed=21,swr=True)
     return JLT_matrix
@@ -118,13 +118,21 @@ def cwt_sketch_matrix(k,m,rng=None):
     S = csc_matrix((signs, rows, cols), shape=(k, m))
     return S
 
-def sparse_sign_embedding_sketch_matrix(k, m, zeta = 8):
-    # scaling correct :)
-    S = np.zeros((k, m))
+# def sparse_sign_embedding_sketch_matrix(k, m, zeta = 8):
+#     # scaling correct :)
+#     S = np.zeros((k, m))
+#     for i in range(m):
+#         for j in np.random.choice(range(k), zeta, replace=False):
+#             S[j, i] = np.random.choice([-1, 1])
+#     return 1/np.sqrt(zeta)*S
+
+def sparse_sign_embedding_sketch_matrix(k, m, zeta=8):
+    S = scipy.sparse.lil_matrix((k, m))
     for i in range(m):
-        for j in np.random.choice(range(k), zeta, replace=False):
-            S[j, i] = np.random.choice([-1, 1])
-    return 1/np.sqrt(zeta)*S
+        rows = np.random.choice(k, zeta, replace=False)
+        S[rows, i] = np.random.choice([-1, 1], size=zeta)
+    S = S.tocsr()  
+    return S * (1 / np.sqrt(zeta))
 
    
 sketching_matricies_dict = {"Orthogonal": orthogonal_sketching_matrix, 
