@@ -43,6 +43,40 @@ def solve_QR_sketch(A, b, k, sketching_matrix_function):
     b_sketched = F @ b
     return solve_QR_exact(A_sketched, b_sketched)
 
+def solve_least_squares_exact_SVD(A, b):
+    """
+    Solve the least squares problem min_x ||Ax - b||_2 using the SVD decomposition.
+
+    Parameters:
+    A (numpy.ndarray): The input matrix A.
+    b (numpy.ndarray): The input vector b.
+
+    Returns:
+    numpy.ndarray: The solution to the least squares problem.
+    """
+    U, S, Vt = np.linalg.svd(A, full_matrices=False)
+    return Vt.T @ np.linalg.solve(np.diag(S), U.T @ b)
+
+def solve_least_squares_sketch_SVD(A, b, k, sketching_matrix_function):
+    """
+    Solve the least squares problem min_x ||Ax - b||_2 using a sketched version of A.
+
+    Parameters:
+    A (numpy.ndarray): The input matrix A.
+    b (numpy.ndarray): The input vector b.
+    k (int): The number of rows to sample from the transformed matrix.
+    sketching_matrix_function (function): The sketching matrix function to use.
+
+    Returns:
+    numpy.ndarray: The solution to the least squares problem.
+    """
+    F = sketching_matrix_function(k, A.shape[0])
+    A_sketched = F @ A
+    b_sketched = F @ b
+    return solve_least_squares_exact_SVD(A_sketched, b_sketched)
+
+
+
 
 
 if __name__ == "__main__":
