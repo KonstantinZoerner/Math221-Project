@@ -77,8 +77,10 @@ def SRFT_real_sketch_matrix(k, m):
     for i, row in enumerate(selected_rows):
         R[i, row] = 1
     return np.sqrt(m/k)*R @ F @ D
+    #return R @ F @ D
 
 def SRFT_complex_sketch_matrix(k, m, angle = None, selected_rows = None):
+    
     assert k < m
 
     if angle is None:
@@ -93,7 +95,7 @@ def SRFT_complex_sketch_matrix(k, m, angle = None, selected_rows = None):
         S[i, row] = 1
 
     B = np.sqrt(m/k)*S @ F @ D
-
+    #B = S @ F @ D
     return B
 
 def hadamard_sketch_matrix(k, m):
@@ -106,6 +108,7 @@ def hadamard_sketch_matrix(k, m):
     for i, row in enumerate(selected_rows):
         R[i, row] = 1
     return np.sqrt(m/k)*R @ H @ D
+    #return R @ H @ D
 
 # sparse sketching
 def cwt_sketch_matrix(k,m,rng=None):
