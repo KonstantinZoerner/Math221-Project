@@ -73,6 +73,7 @@ def SRFT_real_sketch_matrix(k, m):
     """ compare Chapter 2.5 of Randomized Linear Algebra"""
     D = np.diag(np.random.choice([-1, 1], m))
     F = np.sqrt(1/m)*np.fft.fft(np.eye(m))
+    #F=np.fft.fft(D)
     R = np.zeros((k, m))
     selected_rows = np.random.choice(m, k, replace=False)
     for i, row in enumerate(selected_rows):
@@ -424,7 +425,7 @@ def leverage_score_operator(X, rank, num_samples):
    
 
 if __name__ == "__main__":
-    m = 1024
+    """m = 1024
     n = 50
     k = 60
     A = np.random.standard_normal((m, n))
@@ -436,4 +437,5 @@ if __name__ == "__main__":
     As_old = sketch_SRFT_complex(k, A, angle, selected_rows)
     As_new = F @ A
 
-    print(np.linalg.norm(As_new - As_old))
+    print(np.linalg.norm(As_new - As_old))"""
+    A = SRFT_real_sketch_matrix(50, 100)
