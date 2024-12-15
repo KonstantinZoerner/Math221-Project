@@ -40,6 +40,7 @@ def save_plot(name):
     """
     name = name + str(int(time.time()%100000000)) + ".pdf"
     path = "figures/"
+    print("Saving plot to", path + name)
     plt.savefig(path + name, bbox_inches='tight')
 
 if __name__ == "__main__":

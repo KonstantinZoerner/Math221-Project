@@ -21,3 +21,16 @@ def generate_spread_singular_values(shape):
     V = helpers.get_random_orth_matrix(min(m, n), n)
     return U @ S @ V
 
+def generate_spread_singular_values_with_noise(shape, noise_level=1e-3):
+    A = generate_spread_singular_values(shape)
+    A += np.random.standard_normal(shape) * noise_level
+    return A
+
+def generate_multicollinerarity(shape):
+    m, n = shape
+    base = np.random.rand(m)
+    A = np.column_stack([base + 1e-6 * np.random.rand(m) for _ in range(n)])
+    return A
+
+
+
