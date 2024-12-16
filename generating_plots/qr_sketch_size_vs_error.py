@@ -115,7 +115,7 @@ def plot_sketch_size_vs_error_singular_spread(loops = 20, m = 256, n = 20, k_ran
                                 title="qr_err_vs_k_singular_spread", m=m, n=n, k_range=k_range,\
                                 loops=loops, SVD=True, compute_residual=compute_residual)
 
-def plot_sketch_size_vs_error_multicollinerarity(loops = 20, m = 1024, n = 200, k_range = range(210, 500, 20), compute_residual=True):
+def plot_sketch_size_vs_error_multicollinerarity(loops = 20, m = 256, n = 20, k_range = range(40, 100, 5), compute_residual=True):
     sketching_matrix_functions = {"Orthogonal": sketching.orthogonal_sketching_matrix, 
                             "Gaussian": sketching.gaussian_sketching_matrix,
                             "Uniform": sketching.uniform_sketching_matrix,
@@ -138,10 +138,11 @@ if __name__ == "__main__":
     l = 100
     cr = True
     print("=====================\nMulticollinerarity\n=====================")
-    plot_sketch_size_vs_error_multicollinerarity(loops = l, compute_residual=cr)
-    print("=====================\nGaussian\n=====================")
-    plot_sketch_size_vs_error_gaussian(loops = l, compute_residual=cr)
-    print("=====================\nHilbert\n=====================")
-    plot_sketch_size_vs_error_singular_spread(loops = l, compute_residual=cr)
-    print("=====================\nSingular Spread\n=====================")
-    plot_sketch_size_vs_error_hilbert(loops = l, compute_residual=cr)
+    plot_sketch_size_vs_error_singular_spread(loops = l, compute_residual=False)
+    plot_sketch_size_vs_error_singular_spread(loops = l, compute_residual=True)
+    # print("=====================\nGaussian\n=====================")
+    # plot_sketch_size_vs_error_gaussian(loops = l, compute_residual=cr)
+    # print("=====================\nHilbert\n=====================")
+    # plot_sketch_size_vs_error_singular_spread(loops = l, compute_residual=cr)
+    # print("=====================\nSingular Spread\n=====================")
+    # plot_sketch_size_vs_error_hilbert(loops = l, compute_residual=cr)

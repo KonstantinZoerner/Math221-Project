@@ -6,10 +6,13 @@ from sklearn.datasets import fetch_california_housing
 import numpy as np
 import problem_types.QR as QR
 
-def load_california_housing():
+def load_california_housing(n_samples=1024):
     data = fetch_california_housing()
     A = data.data  # Features
     b = data.target  # Target variable
+    rows = np.random.choice(A.shape[0], n_samples, replace=False)
+    A = A[rows, :]
+    b = b[rows]
     return A, b
 
 
