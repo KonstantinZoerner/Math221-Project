@@ -17,7 +17,7 @@ def generate_hilbert(shape):
 def generate_spread_singular_values(shape):
     m, n = shape
     U = helpers.get_random_orth_matrix(m, min(m, n))
-    S = np.diag(np.logspace(0, -10, min(m, n)))  # Eigenvalues range from 1 to 1e-10
+    S = np.diag(np.logspace(10, -10, min(m, n)))  # Eigenvalues range from 1e+10 to 1e-10
     V = helpers.get_random_orth_matrix(min(m, n), n)
     return U @ S @ V
 
