@@ -74,10 +74,8 @@ def SRFT_real_sketch_matrix(k, m):
     D = np.diag(np.random.choice([-1, 1], m))
     F = np.sqrt(1/m)*np.fft.fft(np.eye(m))
     #F=np.fft.fft(D)
-    R = np.zeros((k, m))
     selected_rows = np.random.choice(m, k, replace=False)
-    for i, row in enumerate(selected_rows):
-        R[i, row] = 1
+    R = scipy.sparse.csr_matrix((np.ones(k), (range(k), selected_rows)), shape=(k, m))
     return np.sqrt(m/k)*R @ F @ D
     #return R @ F @ D
 
@@ -92,11 +90,10 @@ def SRFT_complex_sketch_matrix(k, m, angle = None, selected_rows = None):
 
     if selected_rows is None:
         selected_rows = np.random.choice(m, k, replace=False)
-    S = np.zeros((k, m))
-    for i, row in enumerate(selected_rows):
-        S[i, row] = 1
+    selected_rows = np.random.choice(m, k, replace=False)
+    R = scipy.sparse.csr_matrix((np.ones(k), (range(k), selected_rows)), shape=(k, m))
 
-    B = np.sqrt(m/k)*S @ F @ D
+    B = np.sqrt(m/k)*R @ F @ D
     #B = S @ F @ D
     return B
 
@@ -105,10 +102,8 @@ def hadamard_sketch_matrix(k, m):
     angle = np.random.uniform(0, 2*np.pi, m)
     D = np.diag(np.exp(angle * 1j))
     H = scipy.linalg.hadamard(m)
-    R = np.zeros((k, m))
     selected_rows = np.random.choice(m, k, replace=False)
-    for i, row in enumerate(selected_rows):
-        R[i, row] = 1
+    R = scipy.sparse.csr_matrix((np.ones(k), (range(k), selected_rows)), shape=(k, m))
     return np.sqrt(m/k)*R @ H @ D
     #return R @ H @ D
 
@@ -137,6 +132,15 @@ def sparse_sign_embedding_sketch_matrix(k, m, zeta=8):
         S[rows, i] = np.random.choice([-1, 1], size=zeta)
     S = S.tocsr()  
     return S * (1 / np.sqrt(zeta))
+
+
+# def sparse_sign_embedding_sketch_matrix(k, m, zeta=8):
+#     row_indices = np.repeat(np.arange(m), zeta) 
+#     col_indices = np.concatenate([np.random.choice(k, zeta, replace=False) for _ in range(m)])
+#     data = np.random.choice([-1, 1], size=m * zeta)
+
+#     S = scipy.sparse.coo_matrix((data, (col_indices, row_indices)), shape=(k, m))
+#     return S.todense() * (1 / np.sqrt(zeta))
 
    
 sketching_matricies_dict = {"Orthogonal": orthogonal_sketching_matrix, 

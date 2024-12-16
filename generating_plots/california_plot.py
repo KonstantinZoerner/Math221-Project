@@ -37,7 +37,7 @@ def compute_sketch_size_vs_error(A, b, k_range = [60, 80, 100, 125, 250, 500], l
                 rel_difference = np.linalg.norm(sol_exact - sol_sketched)/np.linalg.norm(sol_exact)
                 results[k_index] += rel_difference
                 results[k_index] += rel_difference
-            
+
     results /= loops
     return results
 
@@ -64,7 +64,7 @@ def plot_sketch_size_vs_error(A, b, k_range, loops = 20,\
     helpers.save_plot(f"{title}_loops{loops}_california")
     plt.show()
 
-def plot_sketch_size_vs_error_california(loops = 20, k_range = range(50, 1000, 20), compute_residual=True):
+def plot_sketch_size_vs_error_california(loops = 1, k_range = range(50, 1000, 20), compute_residual=True):
     sketching_matrix_functions = {"Orthogonal": sketching.orthogonal_sketching_matrix, 
                             "Gaussian": sketching.gaussian_sketching_matrix,
                             "Uniform": sketching.uniform_sketching_matrix,
