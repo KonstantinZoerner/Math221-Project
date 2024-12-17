@@ -21,6 +21,11 @@ from sketching_methods.jlt.linearMapping import calculate_R
 # Only returns the sketching matrix, not the sketched matrix
 # =============================================================================
 
+from sketching_methods.jlt.linearMapping import calculate_R
+def JLT_sketching_matrix(k,m):
+    JLT_matrix=calculate_R(m,k,s=1,random_seed=21,swr=True)
+    return JLT_matrix
+
 
 def orthogonal_sketching_matrix(k, m):
     """ checked that scaling works :) """
@@ -69,7 +74,8 @@ def rademacher_sketch_matrix(k, m):
 def SRFT_real_sketch_matrix(k, m):
     """ compare Chapter 2.5 of Randomized Linear Algebra"""
     D = np.diag(np.random.choice([-1, 1], m))
-    F = np.sqrt(1/m)*np.fft.fft(np.eye(m))
+    #F = np.sqrt(1/m)*np.fft.fft(np.eye(m))
+    F = np.fft.fft(np.eye(m))
     #F=np.fft.fft(D)
     selected_rows = np.random.choice(m, k, replace=False)
     R = scipy.sparse.csr_matrix((np.ones(k), (range(k), selected_rows)), shape=(k, m))
