@@ -48,8 +48,9 @@ def randomized_svd_left(A,k,sketching_matrix_func,sketch_size,n_iter):
 def evaluate_sketching(A, sketching_matrix_func,n_iter,sketch_size):
     U, Sigma, Vt = randomized_svd(A,sketching_matrix_func,n_iter,sketch_size)
     A_approx = U@np.diag(Sigma) @ Vt  # Reconstruction
-   
-    error = norm(A - A_approx, 'fro') / norm(A, 'fro')
+    U,S,V=svd(A,full_matrices=False)
+    approx_svd=U[:,:sketch_size]@np.diag(S[:sketch_size])@V[:sketch_size,:]
+    error = norm(approx_svd - A_approx, 'fro') / norm(A, 'fro')
     return error
 
 # Main script
@@ -76,22 +77,26 @@ if __name__ == "__main__":
   
     sketch_sizes = range(100, 700, 10)
     results = {name: [] for name in methods.keys()}
+    results['svd']=[]
     for sketch_size in sketch_sizes:
         for name, func in methods.items():
             error = evaluate_sketching(A, func,n_iter,sketch_size)
             results[name].append(error)
+        
+        '''rror_svd=norm(approx_svd-A,'fro')/norm(A,'fro')
+        results['svd'].append(error_svd)'''
             #print(name)
     # Plot results
     plt.figure(figsize=(10, 6))
     for name, errors in results.items():
         plt.plot(sketch_sizes, errors, label=name)
-    
+    plt.yscale("log")
     plt.xlabel("Sketch Size")
     plt.ylabel("Relative Error")
     plt.title("Performance of Sketching Methods on m1")
     plt.legend()
     plt.grid()
-    plt.show()
+    plt.savefig('m1_low_rank_2.pdf')
 
     #Check the singular values
     print('A1',np.linalg.cond(A))
@@ -101,67 +106,83 @@ if __name__ == "__main__":
   
     sketch_sizes = range(100, 700, 10)
     results = {name: [] for name in methods.keys()}
+    results['svd']=[]
     for sketch_size in sketch_sizes:
         for name, func in methods.items():
             error = evaluate_sketching(A_2, func,n_iter,sketch_size)
             results[name].append(error)
+        #U,S,V=svd(A_2,full_matrices=False)
+        #approx_svd=U[:,:sketch_size]@np.diag(S[:sketch_size])@V[:sketch_size,:]
+        #error_svd=norm(approx_svd-A_2,'fro')/norm(A_2,'fro')
+        #results['svd'].append(error_svd)
             #print(name)
     # Plot results
     plt.figure(figsize=(10, 6))
     for name, errors in results.items():
         plt.plot(sketch_sizes, errors, label=name)
-    
+    plt.yscale("log")
     plt.xlabel("Sketch Size")
     plt.ylabel("Relative Error")
     plt.title("Performance of Sketching Methods on m2")
     plt.legend()
     plt.grid()
-    plt.show()
+    plt.savefig('m2_low_rank_2.pdf')
     print('A2',np.linalg.cond(A_2))
+
     A_3=generate_hilbert((512,1024))
     n_iter=2
   
     
     sketch_sizes = range(100, 700, 10)
     results = {name: [] for name in methods.keys()}
+    results['svd']=[]
     for sketch_size in sketch_sizes:
         for name, func in methods.items():
             error = evaluate_sketching(A_3, func,n_iter,sketch_size)
             results[name].append(error)
+    ''' U,S,V=svd(A_3,full_matrices=False)
+        approx_svd=U[:,:sketch_size]@np.diag(S[:sketch_size])@V[:sketch_size,:]
+        error_svd=norm(approx_svd-A_3,'fro')/norm(A_3,'fro')
+        results['svd'].append(error_svd)'''
             #print(name)
     # Plot results
     plt.figure(figsize=(10, 6))
     for name, errors in results.items():
         plt.plot(sketch_sizes, errors, label=name)
-    
+    plt.yscale("log")
     plt.xlabel("Sketch Size")
     plt.ylabel("Relative Error")
     plt.title("Performance of Sketching Methods on m3")
     plt.legend()
     plt.grid()
-    plt.show()
+    plt.savefig('m3_low_rank_2.pdf')
     print('A3',np.linalg.cond(A_3))
     A_4=generate_multicollinerarity((512,1024))
     n_iter=2
   
     sketch_sizes = range(100, 700, 10)
     results = {name: [] for name in methods.keys()}
+    results['svd']=[]
     for sketch_size in sketch_sizes:
         for name, func in methods.items():
             error = evaluate_sketching(A_4, func,n_iter,sketch_size)
             results[name].append(error)
             #print(name)
+        '''U,S,V=svd(A_4,full_matrices=False)
+        approx_svd=U[:,:sketch_size]@np.diag(S[:sketch_size])@V[:sketch_size,:]
+        error_svd=norm(approx_svd-A_4,'fro')/norm(A_4,'fro')'''
+        '''results['svd'].append(error_svd)'''
     # Plot results
     plt.figure(figsize=(10, 6))
     for name, errors in results.items():
         plt.plot(sketch_sizes, errors, label=name)
-    
+    plt.yscale("log")
     plt.xlabel("Sketch Size")
     plt.ylabel("Relative Error")
     plt.title("Performance of Sketching Methods on m4")
     plt.legend()
     plt.grid()
-    plt.show()
+    plt.savefig('m4_low_rank_2.pdf')
 
     print('A4',np.linalg.cond(A_4))
     A_5=generate_spread_singular_values((512,1024))
@@ -169,20 +190,25 @@ if __name__ == "__main__":
   
     sketch_sizes = range(100, 700, 10)
     results = {name: [] for name in methods.keys()}
+    results['svd']=[]
     for sketch_size in sketch_sizes:
         for name, func in methods.items():
             error = evaluate_sketching(A_5, func,n_iter,sketch_size)
             results[name].append(error)
+        '''U,S,V=svd(A_5,full_matrices=False)
+        approx_svd=U[:,:sketch_size]@np.diag(S[:sketch_size])@V[:sketch_size,:]
+        error_svd=norm(approx_svd-A_5,'fro')/norm(A_5,'fro')
+        results['svd'].append(error_svd)'''
             #print(name)
     # Plot results
     plt.figure(figsize=(10, 6))
     for name, errors in results.items():
         plt.plot(sketch_sizes, errors, label=name)
-    
+    plt.yscale("log")
     plt.xlabel("Sketch Size")
     plt.ylabel("Relative Error")
     plt.title("Performance of Sketching Methods on m5")
     plt.legend()
     plt.grid()
-    plt.show()
+    plt.savefig('m5_low_rank_2.pdf')
     print('A5',np.linalg.cond(A_5))
