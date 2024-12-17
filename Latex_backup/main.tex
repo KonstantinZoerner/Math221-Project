@@ -1,7 +1,9 @@
 \documentclass{article}
 \usepackage{graphicx} % Required for inserting images
 \usepackage{algorithm} 
+\usepackage{subcaption}
 \usepackage{algpseudocode} 
+\usepackage{comment}
 \usepackage[
 backend=biber,
 style=alphabetic,
@@ -11,7 +13,7 @@ sorting=ynt
 %\usepackage{cleverref}
 %\usepackage{layouts}
 \usepackage{graphicx}
-\usepackage{subcaption}
+
 \usepackage{adjustbox}
 
 \usepackage{amssymb}
@@ -41,7 +43,7 @@ sorting=ynt
 \section{Introduction}
 Due to the ubiquity of linear algebra in applied mathematics, dimension reduction and memory saving have been  perpetual topics as there is an ever-increasing demand for solving larger problems faster. However, numerical linear algebra's potential in this field has been well understood and exploited. On the other hand, randomized linear algebra (RLA) is a promising field that still has considerable space for utilization. In 1984, it was discovered that projecting onto a random basis approximately preserves pairwise distances with high probability~\cite{beals1984conference}, thereby opening the doors to using randomized techniques to solve previously difficult or expensive problems.
 
-Sketching -- the process of reducing a standard linear algebra problem to a smaller, more tractable one by projecting the matrix of interest to a lower-dimensional subspace --  forms the backbone of RLA and is thus essential to building a deeper understanding of the subject. As such, in this paper, we focus on this important building block rather than one individual example of a particular RLA routine. 
+Sketching -- the process of reducing a standard linear algebra problem to a smaller, more tractable one by projecting the matrix of interest to a lower-dimensional subspace --  forms the backbone of aplty named sketch-and-solve RLA algorithms and is thus essential to building a deeper understanding of the subject. As such, in this paper, we focus on this important building block rather than one individual example of a particular RLA routine. 
 
 A large variety of different techniques has been proposed to construct a random sketching operators. Further, different linear algebra problems lead themselves to different matrix structures, and as such, to different sketching matrix structures. Therefore, this paper focuses on investigating which sketch matrix structures are most suitable for a number of sample problems, both from the theoretical and computational perspective.
 
@@ -52,31 +54,34 @@ A large variety of different techniques has been proposed to construct a random 
 
 \section{Literature Review}
 
-Randomized algorithms consist of two steps: first, reduce the problem to one of a smaller dimension, and secondly, apply the deterministic algorithm to the reduced problem. This survey focuses on analyzing the first step.
+Randomized sketch-and-solve algorithms consist of two steps: first, reduce the problem to one of a smaller dimension, and secondly, apply the deterministic algorithm to the reduced problem. This survey focuses on analyzing the first step.
 
-In the following section, we present a number of sketching matrix  $S$ architectures. Unless otherwise noted, the original matrix $A$ is $m \times n$, and the sketching operator $S$ is $k \times m $ , where $k \leq m$.
+In the following section, we present a number of sketching matrix  $S$ architectures. In this paper, we discuss left-sketching, that is, projecting the target matrix $A$ to $SA$. Unless otherwise noted, the original matrix $A$ is $m \times n$, and the sketching operator $S$ is $k \times m $, where $k \leq m$.
 
 \subsection{Preliminaries}
+\label{sec:preliminaries}
 Sketching matrices are linear maps defined as $(1\pm \varepsilon) \ell_2$ embeddings 
 \begin{equation}
+\label{eq:ebedding_property}
     (1 - \varepsilon) \|Ax\|^2_2 \leq \|SAx\|^2_2 \leq (1+\varepsilon) \|Ax\|^2_2
 \end{equation}
-with a certain probability, which represents how much $SA$ deviates from being an isometry for $A$. The distortion $\varepsilon$ can be explicitly calculated as follows \cite{magdonismail2019fastfixeddimensionl2subspace}:
+with a certain probability depending on the structure of $S$, which represents how much $SA$ deviates from being an isometry for $A$. The distortion $\varepsilon$ can be explicitly calculated as follows \cite{magdonismail2019fastfixeddimensionl2subspace}:
 \begin{equation}
+\label{eq:distortion}
     \varepsilon = \|I - (A^TA)^{-1/2} (SA)^T (SA) (A^TA)^{-1/2}\|_2
 \end{equation}
 
 \subsection{Random Orthogonal Matrices}
 
 
-Arguably, one of the simplest sketch matrix types is the random orthogonal matrix, which is sometimes referred to as Haar operators. It is defined in the Johnson–Lindenstrauss lemma~\cite{https://doi.org/10.1002/rsa.10073,Johnson1984ExtensionsOL}, which states the following:\\
+Arguably, one of the simplest sketch matrix types is the random orthogonal matrix, which is sometimes referred to as Haar operators. It is defined in the Johnson–Lindenstrauss lemma~\cite{https://doi.org/10.1002/rsa.10073,Johnson1984ExtensionsOL}, which states the following:
 \begin{lemma}
-\textit{
-For $0 < \varepsilon < 1$, $x_1, \dots, x_m \in \mathbb{R}^m$, $k \geq 8 \ln(n) / \varepsilon^2$, and $F \in \mathbb{R}^{k \times m}$ such that $F = \sqrt{\frac mk} \; Q$ for $Q$ orthogonal, then with probability greater than or equal to $\frac 1n$,
+For $0 < \varepsilon < 1$ and any integer $n$, for $k \geq 8\varepsilon^{-2}\log n $, then for any set $X$ of $n$ vectors in $\mathbb{R}^m$, there is a random orthogonal matrix scaled by $\sqrt{m/k}$, $S$, such that for all $x_i \in X$
 \begin{align*}
-    1 - \varepsilon \leq \frac{||F (x_i - x_j)||_2^2}{||x_i - x_j||_2^2} \leq  1 + \varepsilon
+    (1 - \varepsilon)||x_i - x_j||_2^2 \leq ||S (x_i - x_j)||_2^2 \leq  (1 + \varepsilon)||x_i - x_j||_2^2
 \end{align*} 
-for all $1 \leq i, j\leq n, i \neq j$.}\end{lemma}
+for all $1 \leq i, j\leq n, i \neq j$ with probability greater than or equal to $1/n$.\end{lemma}
+
 
 Naively, this allows the construction of a sketching matrix through the following algorithm:
 \begin{enumerate}
@@ -85,37 +90,40 @@ Naively, this allows the construction of a sketching matrix through the followin
     \item  Set $S = \sqrt{\frac mk} \; Q$.\footnote{This is justified by the fact that sketching matrices $S$ are defined to preserve expectations($\mathbb{E} \|Sx\|_2^2 = \|x\|_2^2$) due to its embedding property \cite{Nakatsukasa2024accuraterandomizedalgorithms}}.
 \end{enumerate}
 
+Unfortunately, in order to achieve low distortions, the random orthogonal matrix defined by the Johnson-Lindenstrauss lemma is impractical due to the fact that the embedding dimension is proportional to $\varepsilon^{-2}$, making it difficult to achieve low distortions \cite{martinsson2021randomizednumericallinearalgebra}. Moreover, the sketching process itself may be rather prohbitive because it nessesitates running the $QR$ decomposition algorithm (which takes $\bO(mk^2)$ on a wide left-sketching matrix) as well as multiplying $S$ and $A$ (which takes $\bO(mnk)$ operations).
 
-%Unfortunately, this algorithm is not feasible in many applications due to the fact that decomposing $M = QR$ has a computational complexity of $\bO(mk^2)$. An alternative formulation of this algorithm, which reduces its complexity to $\bO(mk)$ time, generates $Q$ as a random Householder transformation... elaborate
-
-%other pdfs for generating entries in Q... (uniform, signed, etc.)\\
 
 \subsection{Dense sketching operators}
+\label{sec:Dense sketching operators}
 In dense sketching operators, we sample sketching operators with i.i.d. entries drawn from particular distributions. We introduce three kinds of operators for this survey, noting that depending on the dimensions of the problem, they may need to be rescaled to preserve isometry: 
 \begin{itemize}
    \item \textbf{Rademacher sketching operators}: entries are $\pm 1$ with equal probability.
-    \item \textbf{Uniform sketching operators}: entries are sampled from the uniform distribution on $[-1, 1]$.
-    \item \textbf{Gaussian sketching operators}: entries are sampled from the standard normal distribution
+    \item \textbf{Uniform sketching operators}: entries are sampled from a uniform distribution over a symmetric interval.
+    \item \textbf{Gaussian sketching operators}: entries are sampled from a normal distribution with mean $0$.
 \end{itemize}
 
-Universality principles in high-dimensional probability \cite{oymak2018universality} guarantee that these sketching operators are practically equivalent \footnote{This applies in general when each of the entries are independent random variables, have mean $0$ and variance $1$, are drawn from a symmetric distribution, and have uniformly bounded moments \cite{oymak2018universality}.}, which is also shown in our results. %For the sake of completeness, all three are included in this survey. It should be noted that sketching with Rademacher matrices may be implemented more efficiently than with i.i.d. Gaussian or uniform sketching operators since the matrix multiplication of $SA$ does not require any multiplication in the dot product computation -- only addition and subtraction.%
+Universality principles in high-dimensional probability \cite{oymak2018universality} guarantee that these sketching operators are practically equivalent \footnote{This applies to any such matrix when each of the entries are independent random variables, have mean $0$ and variance $1$, are drawn from a symmetric distribution, and have uniformly bounded moments \cite{oymak2018universality}.}, which is also highlighted in our results. 
+
+%For the sake of completeness, all three are included in this survey. It should be noted that sketching with Rademacher matrices may be implemented more efficiently than with i.i.d. Gaussian or uniform sketching operators since the matrix multiplication of $SA$ does not require any multiplication in the dot product computation -- only addition and subtraction.%
 
 %These sketching matrices are primarily used for low rank approximation and not the least-squares problem, when the primary purpose of the sketching operator is to sample the matrix in question, rather than to embed it into a smaller subspace, a fact which is proven infeasible due to the generally expensive nature of sketching with them \cite{murray2023randomizednumericallinearalgebra}.
 
 
-We will investigate at their implementation efficiency and the intended use cases for these operators. Sampling from the Rademacher or uniform distributions is the most basic operation of random number generators. Methods for sampling from the Gaussian distribution involve transforming random variables sampled uniformly from $[0,1]$~\cite{murray2023randomizednumericallinearalgebra}.
+%We will investigate at their implementation efficiency and the intended use cases for these operators. Sampling from the Rademacher or uniform distributions is the most basic operation of random number generators. Methods for sampling from the Gaussian distribution involve transforming random variables sampled uniformly from $[0,1]$~\cite{murray2023randomizednumericallinearalgebra}.
 
-The intended use case for dense sketching operators is mainly 'sketching in the sampling regime', where the sketching operator is far smaller than the data to be sketched. When the sketching matrix is larger than the data to be sketched, these distributions are much less useful because they are more expensive to apply to dense matrices\cite{murray2023randomizednumericallinearalgebra} -- indeed, although for $S$ a $k \times m$ operator, the distortion for a sketched matrix $SA$ grows as $\Theta(\sqrt \frac nk)$, where $A$ is $m \times n$ \cite{magdonismail2019fastfixeddimensionl2subspace}.
+The intended use case for dense sketching operators is mainly sketching in the sampling regime, where the sketching operator is far smaller than the data to be sketched. When the sketching matrix is larger than the data to be sketched, these distributions are much less useful because they are more expensive to apply to dense matrices\cite{murray2023randomizednumericallinearalgebra} -- indeed, although for $S$ a $k \times m$ sketching operator, the distortion for a sketched matrix $\varepsilon \in \Theta(\sqrt{ n/k})$, where $A$ is $m \times n$ \cite{magdonismail2019fastfixeddimensionl2subspace}.
 
 
 \subsection{Sparse sketching operators}
-Sparse sketching operators can be classified as either sort-axis-sparse (SASO) or long-axis-sparse operators (LASO) \cite{murray2023randomizednumericallinearalgebra}, where the short and long axes correspond to the rows and columns (resp. columns and rows) of a wide (resp. tall) matrix. These correspond to how the sketch matrix is constructed: whether its "long" or "short" axis elements are independent from one another. As such, a SASO matrix has independent short axis vectors (e.g. columns in a wide matrix or rows in a tall matrix), with the opposite applying to LASOs.
+Sparse sketching operators are often constructed by independently generating the rows or columns of the sketching operator. Nevertheless, it should be noted that there exists another type of sparse sketching operator -- the i.i.d. sparse sketching operator -- constructed by randomly setting many of a dense sketching operator's entries to $0$. However, because of their random structure, their theoretical guarantees are not as robust as the aforementioned row-by-row or column-by-column sketching operator \cite{murray2023randomizednumericallinearalgebra}.
+
+%can be classified as either sort-axis-sparse (SASO) or long-axis-sparse operators (LASO) \cite{murray2023randomizednumericallinearalgebra}, where the short and long axes correspond to the rows and columns (resp. columns and rows) of a wide (resp. tall) matrix. These correspond to how the sketch matrix is constructed: whether its "long" or "short" axis elements are independent from one another. As such, a SASO matrix has independent short axis vectors (e.g. columns in a wide matrix or rows in a tall matrix), with the opposite applying to LASOs.
 
 %Because this work focuses exclusively on left-sketching (i.e. sketching of the form $SA$ as opposed to $AS$),%
-In our work, we will primarily discuss SASOes. %which are more commonly used for this sketching method. 
-It should be noted that there exists another type of sparse sketching operator which is the i.i.d. sparse sketching operator, constructed by randomly setting many of a dense sketching operator's entries to $0$. However, because of their random structure, their theoretical guarantees are not as robust as the aforementioned operators \cite{murray2023randomizednumericallinearalgebra}.
+%In our work, we will primarily discuss SASOes. %which are more commonly used for this sketching method. 
+%It should be noted that there exists another type of sparse sketching operator which is the i.i.d. sparse sketching operator, constructed by randomly setting many of a dense sketching operator's entries to $0$. However, because of their random structure, their theoretical guarantees are not as robust as the aforementioned operators \cite{murray2023randomizednumericallinearalgebra}.
 
-A prototypical example of a sparse sketching operator is the Clarkson-Woodruff transform (CWT), also known as the CountSketch matrix \cite{10.1145/3019134}. This matrix is generated by choosing one element in each of its columns to be equal to $\pm 1$ with equal probability, and setting the rest to $0$.
+A prototypical example of a sparse sketching operator is the Clarkson-Woodruff transform (CWT), also known as the CountSketch matrix \cite{10.1145/3019134}. This matrix is generated by choosing one element in each of its columns to be equal to $\pm 1$ with equal probability, and setting the rest to $0$. Using this as a sketching matrix, we have that the distortion $\varepsilon \in \Theta(\sqrt{n^2/k})$ \cite{magdonismail2019fastfixeddimensionl2subspace}.
 
 This can be generalized to a Sparse Sign Embedding (SSE) \cite{9414030}, which can contain more than one non-zero entry per column. Namely, for a $k \times m$ SSE matrix $S$ and parameter $p\in(0, 1)$, it satisfies 
 
@@ -129,17 +137,18 @@ This can be generalized to a Sparse Sign Embedding (SSE) \cite{9414030}, which c
 
 where $\alpha =  \frac{1}{kp}$ is a normalizing factor included to ensure $S$ has an expectation of $I_m$ \cite{tropp_2023_0na16-j0x38}.
 
-Sparse sign matrices satisfy the following bound:\\
+%Sparse sign matrices satisfy the following bound:\\
 
 \textit{For $S$ $k\times m$, $p \in (0, 1)$, $C_1, C_2$ positive constants and the following condition:  
 \begin{equation}
-    k \gtrapprox  C_1 (l + \log m) \log l, \qquad  p \gtrapprox C_2 \frac{\log l}{k}
+    k \gtrapprox  C_1 (d + \log m) \log d, \qquad  p \gtrapprox C_2 \frac{\log d}{k}
 \end{equation}
-Then with high probability, for any l-dimensional subspace, $S$ is an embedding with constant distortion $\frac12$} \cite{tropp_2023_0na16-j0x38}.
+then with high probability, for any $d$-dimensional subspace, $S$ is an embedding with constant distortion $\frac{1}{2}$} \cite{tropp_2023_0na16-j0x38}.
 
+These can also be generated by specifying a sparsity parameter $\zeta$ to represent the number of non-zero elements per column. Analogously, it has been shown that a sparse sign matrix serves as a subspace embedding with high probability with constant distortion for an arbitrary $l$-dimensional subspace of $\mathbb{R}^m$ when the embedding dimension grows $\bO(d \log d)$ and the sparsity parameter $\zeta$ as $\bO(\log d)$ \cite{martinsson2021randomizednumericallinearalgebra}.
 
 \subsection{Subsampled Random Trigonometric Transformations}
-Fast trigonometric transforms are orthogonal or unitary operators that take m-vectors to m-vectors in $\bO(m\log m)$ time or better.% The most important examples in this class are the Discrete Fourier Transform(for complex valued inputs) and the Discrete Cosine Transform (for real-valued inputs). At the same time, the Walsh-Hadamard Transform is also notable. 
+Fast trigonometric transforms are orthogonal or unitary operators that take m-vectors to m-vectors in $\bO(m \log m)$ time or better. % The most important examples in this class are the Discrete Fourier Transform(for complex valued inputs) and the Discrete Cosine Transform (for real-valued inputs). At the same time, the Walsh-Hadamard Transform is also notable. 
 In randomized algorithms, we treasure their ability to map inputs that lack periodic structure to dense outputs, and they are referred to as \textit{subsampled randomized fast trig transforms}.  
 
 These sketching operators are defined as follows \cite{halko2010findingstructurerandomnessprobabilistic}:
@@ -147,76 +156,32 @@ These sketching operators are defined as follows \cite{halko2010findingstructure
     S = \sqrt{\frac mk}RTD
 \end{align*}
 
-Where $D$ is a $m \times m$ diagonal matrix %whose diagonal entries are uniformly distributed around the unit circle (so in the real case, they'd randomly be $\pm 1$)
-of independent Rademachers, $T$ is a trigonometric transform, and $R \in \mathbb{R}^{k \times m}$ is a sampling matrix, selecting $k$ rows from the $m \times m$ matrix it multiplies.
+Where $D$ is a $m \times m$ diagonal matrix whose diagonal entries are uniformly distributed around the unit circle in the complex case (and in the real case, $\pm 1$), $T$ is a trigonometric transform, and $R \in \mathbb{R}^{k \times m}$ is a sampling matrix, selecting $k$ rows from the $m \times m$ matrix it multiplies.
 
 Depending on the initial data or other problem parameters, $T$ can be a discrete Fourier transform such that $(T)_{jk} = m^{-\frac12}e^{-\frac{2\pi i}{m}(j-1)(k-1)}$ for $j, k = 1, 2, \dots, m$, the similarly defined discrete sine or cosine transforms, or the discrete Hadamard transform, where $T = H_m$ for $m = 2^n$ and:\\
 \begin{align*}
     H_m = \begin{bmatrix} H_{m/2} & H_{m/2} \\ H_{m/2} & -H_{m/2} \end{bmatrix}, \qquad H_2 =  \begin{bmatrix} 1 & 1 \\ 1 & -1 \end{bmatrix}
 \end{align*}
 
-It should be noted that although $S$ can be represented as a nested series of matrix multiplications, in practice, the sketching operator can be applied to each column vector $x$ of the initial matrix $A$ by scaling (multiplication by $D$, applying the trigonometric transform like the DFT (multiplication by $T$), and then randomly sampling the result (multiplication by $R$), thereby reducing the sketching operation to be of order at most $\bO(mk\log m)$ for each column vector. For all practical applications, this is how the algorithm is implemented.\\
+Thus, the Hadamard transform functions as a sort of analoughe for the Fourier transform for real data, having a distortion $\varepsilon \in \Theta(\sqrt{(n \log n)/d})$ \cite{magdonismail2019fastfixeddimensionl2subspace}. It should be noted that although $S$ can be represented as a nested series of matrix multiplications, in practice, the sketching operator can be applied to each column vector $x$ of the initial matrix $A$ by scaling (multiplication by $D$, applying the trigonometric transform like the DFT (multiplication by $T$), and then randomly sampling the result (multiplication by $R$), thereby reducing the sketching operation to be of order at most $\bO(mk\log m)$ for each column vector. For all practical applications, this is how the algorithm is implemented.\\
 
 
-\textit{For a positive constant $C$ and for $k \gtrapprox C (l + \log m) \log l$, then with high probability, for an $l$-dimensional subspace, the SRFT matrix $S$ is a subspace embedding with distortion $\frac12$}\cite{tropp_2023_0na16-j0x38}.\\
+\textit{For a positive constant $C$ and for $k \gtrapprox C (d + \log m) \log d$, then with high probability, for an $d$-dimensional subspace, the SRFT matrix $S$ is a subspace embedding with distortion $\frac12$}\cite{tropp_2023_0na16-j0x38}.\\
 
-
-SRFTs are appealing for their efficiency and theoretical guarantees\cite{WOOLFE2008335}.
-However, it is pointed out in some paper~\cite{murray2023randomizednumericallinearalgebra} that block SRFTs~\cite{balabanov2022blocksubsampledrandomizedhadamard} are worth more attention than the traditional one. 
-%We basically follow the code from \href{https://github.com/matthiasbe/block\_srht}{https://github.com/matthiasbe/block\_srht}.
-%\subsection{notes of rangefinder problem}
-%Let $B\in F^{m\times n}$ be an input matrix, and let $l\leq min\{m,n\}$ be the subspace dimension.The goal of the rangefinder problem is to produce an orthonormal matrix $Q\in F^{m\times l}$ whose range aligns with the dominant left singular vectors of B.
-
-%To measure the quality of Q, we use the spectral norm error\[||B-QQ^*B||=||(I-QQ^*)B||\]
-%If the error measure is small, then the rank-l matrix $\hat{B}=QQ^*B$ can serve as a proxy for B.
-%And we are gonna look into different kinds of randomized rangefinders. Using randomized methods, it is remarkably easy to find an initial solution to the rangefinder problem. We could simply multiply the target matrix by a random embedding and then orthogonalize the resulting matrix.More rigorously, what people usually do is as follows, consider a target matrix $B\in F^{m\times n}$ and a subspace dimension l. We draw a random test matrix $\Omega \in F^{n\times l}$, where $\Omega^*$ is a mixing random embedding. We form the product $Y=B\Omega \in F^{m\times l}$.Then we compute an orthonormal basis $Q\in F^{m\times l}$ for the range of $Y$ using a QR factorization method.
-
-%Using randomized methods, it is remarkably easy to find an initial solution to the rangefinder problem. We simply multiply the target matrix by a random embedding and then orthogonalize the resulting matrix.
-%\subsection{The Rangefinder Problem And Some Details}
-
-%The algorithm to get the solution is stated in algorithm \ref{algorithm 1}.
-%To implement the algorithm \ref{algorithm 1} effectively, several computational aspects require attention.
-%\begin{itemize}
-%    \item How do we choose the subspace dimension?
-%    If we have advance knowledge of the "effective rank" r of the target matrix B, the theory\cite{halko2011finding} indicates that we can select the subspace dimension l to be just slightly larger,say, $l=r+p$ where p=5 or p=10, where the value p is called the oversampling parameter.
-%    \item what kinds of random matrix?
-%    \item Matrix multiplication
-%    \item Powering
-%    \item orthongonalization
-%    The columns of the matrix $Y$ tend to be strongly aligned, so it is important to use a numerically stable orthogonalization procedure, such as Householder relectors, double Gram-Schmidt, or rank-revealing QR.The rangefinder algorithm is also a natural place to invoke a TSQR algorithm.
-%\end{itemize}
-
-
-%We can use most types of mixing random embeddings to implement the approximation matrix finder. This is also what we mainly means by sketching. And we are gonna compare different kinds of random embeddings which are also called sketching operator distributions. These types of distributions consist of dense sketching operators (e.g., Gaussian matrices), sparse sketching operators, and sketching operators based on subsampled fast trigonometric transforms (such as discrete Fourier, discrete cosine, and Walsh-Hadamard transforms). 
-
-%First, we restate the idea of random embedding. Let $E\in F^n$ be a set, and let $\epsilon \in(0,1)$ be a distortion parameter. We say that a linear map $S:F^n\rightarrow F^d$ is an $(l_2)$ embedding of E with distortion $\epsilon$ when \[(1-\epsilon)||\boldsymbol{x}||\leq ||\boldsymbol{Sx}||\leq (1+\epsilon)||\boldsymbol{x}||\] for all $\boldsymbol{x}\in E$.We usually think about the case when $d\ll n$.So the map S enacts a dimension reduction.\\
-%Then, we are gonna analyze dense sketching operators.The common feature shared by this kind of sampling sketching operators are that they are with i.i.d entries drawn from distinguished distributions where the three types of operators stand out:\\
-
-%The first embedding we are gonna introduce is gaussian embedding. Gaussian embedding is a random matrix of the form\[\Gamma\in F^{d\times n}\text{with iid entries } (\Gamma)_{ij}\sim\text{ NORMAL}(0,d^{-1})\].
-%Second, as we mentioned before, there are some sparse sketching operators. In \cite{murray2023randomizednumericallinearalgebra}, they classify sparse skteching operators into two classes.
-%\begin{itemize}
- %   \item Short-axis-sparse sketching operators. The short-axis vectors of these operators are independent of one another. Each short-axis vector has a fixed number of nonzeros. Typically, the indices of the nonzeros in each short-axis vectors are sampled uniformly without replacement.
-  %  \item Long-axis-sparse sketching operators. The long-axis vectors of these operators are independent of one another. For a given long-axis vector, the indices for its nonzeros are sampled with replacement according to a prescribed probability distribution (which can be uniform). The value of a given nonzeros is affected by the number of times its index appears in the sample for that vector.
-%\end{itemize}
-
-%For the short-axis-sparse sketching operators, there are a lot of very good operators inclluding Johnson-Lindenstrauss transforms, Woodruff transform, CountSketch and OSNAPs~\cite{DBLP:journals/corr/abs-1012-1577,10.1145/3019134}. 
-
-%In terms of long-axis-sparse sketching operators, they include row and column sampling, LESS embeddings, and LESS-uniform operators~\cite{DBLP:journals/corr/abs-2011-10695}.
-
-%The most important examples in the class of subsampled fast trigonometric transforms are the Discrete Fourier Transform and the Discrete Cosine Transform.
-
-%The cost of explicitly storing a Gaussian embedding is $O(dn)$.And the cost of applying it to a vector is $O(dn)$.%
-%Also, we consider that different sketching matrices maybe suitable for different matrices structures.%
+Curiously, although theoretically SRTTs need the embedding dimension to grow as $\bO (d \log d)$ as above, it is often sufficient to to choose an embedding dimension of only $\bO(d)$ \cite{martinsson2021randomizednumericallinearalgebra}.
+%SRFTs are appealing for their efficiency and theoretical guarantees\cite{WOOLFE2008335}. However, it is pointed out in some paper~\cite{murray2023randomizednumericallinearalgebra} that block SRFTs~\cite{balabanov2022blocksubsampledrandomizedhadamard} are worth more attention than the traditional one. 
 %In the book, they use a taxonomy for sparse sketching operators which has not appeared in prior literature: To describe it, we use the term short-axis vector in reference to the columns of a wide matrix or rows of a tall matrix. The term long-axis vector..
 
 \subsection{Properties of Sketching Matrices and Sketch Quality}
 
-Distributions D over wide sketching operators are typically designed so that , for S\~ D, the mean and covariance matrices are 
-\begin{itemize}
-    \item embedding property as noted before with example plot
-    \item distortion (with example plot)
-\end{itemize}
-Both examples are for $A \in \mathbb{R}^{1024 \times 50}$ that matches the matrix size used in the later experiments for Least Squares.
+Now that we have introduced all of the sketching methods that we will use we can look back at the two properties \hyperref[eq:ebedding_property]{(\ref*{eq:ebedding_property})} and \hyperref[eq:distortion]{(\ref*{eq:distortion})} introduced in \hyperref[sec:preliminaries]{Section~\ref*{sec:preliminaries}}. In practice, it oftentimes suffices to require a relaxed version of property \hyperref[eq:ebedding_property]{(\ref*{eq:ebedding_property})}, namely it suffices if a sketching matrix preserves relative norms \cite{murray2023randomizednumericallinearalgebra}, i.e. 
+\begin{equation}
+    \frac{\Vert Su\Vert_2}{\Vert Su\Vert_2} \approx \frac{\Vert u\Vert_2}{\Vert v \Vert_2}
+    \quad \text{for } u, v \in \mathrm{col}\{A\}.
+\end{equation}
+
+To illustrate that the introduced sketching methods fulfill this property we depict how they impact the relative norm in \hyperref[fig:sketch_properties]{Figure~\ref*{fig:sketch_properties}} along side the computed distortion of some of the sketching methods for a matrix $A \in \mathbb{R}^{1024 \times 50}$ with entries i.i.d. sampled form a standard normal distribution.
+
 
 
 \begin{figure}[htb]
@@ -229,7 +194,7 @@ Both examples are for $A \in \mathbb{R}^{1024 \times 50}$ that matches the matri
     \centering
     \adjustbox{valign=t}{\includegraphics[width=\textwidth]{figures/sketching_properties/sketch_size_vs_distortion34066431.pdf}}
   \end{minipage}
-  \caption{Illustration of the embedding property for different sketching methods (left). Distortion for a matrix $A \in \mathbb{R}^{1024 \times 50}$ for different sketching methods (right).}
+  \caption{Illustration of the embedding property for different sketching methods (left). Distortion for a matrix $A \in \mathbb{R}^{1024 \times 50}$ with i.i.d. standard normal entries for different sketching methods (right).}
   \label{fig:sketch_properties}
 \end{figure}
 
@@ -238,9 +203,16 @@ Both examples are for $A \in \mathbb{R}^{1024 \times 50}$ that matches the matri
 \subsection{Low-Rank Approximation}
 The low-rank approximation problem could be stated as follows:\\
 
-\textit{Given an $m \times n$ matrix $A$, find a matrix $A'$ such that \text{rank}$(A') = k \ll \min(m, n)$ and $\| A - A'\|$ is minimized in a suitable norm.}\\
+\textit{Given an $m \times n$ matrix $A$, find a matrix $A_k$ such that} \text{rank}$(A_k) = k \ll \min(m, n)$ \textit{and $\| A - A_k\|$ is minimized.}\\
 
-Classical deterministic algorithms for this problem, like singular value decomposition and rank-revealing QR factorization take $\bO(mn^2)$ time when $n \leq m$, thus making low-rank approximation difficult, if not infeasible for many large matrices. However, by applying the sketching operator to $A$, its dimension is reduced to $k \times n$, thereby allowing the algorithms to be run much faster. 
+There are two primary approaches to solving this problem that are best exemplified through the following algorithms:
+\begin{itemize}
+    \item \textbf{Singular Value Decomposition}: Factorizing the target matrix as $A = U \Sigma V^T$ with $U, V$ orthogonal and $\Sigma$ diagonal. By denoting $u_i$ and $v_i$ to be the column vectors of $U$ and $V$ respectively and $\Sigma = \text{diag}(\sigma_1, \dots, \sigma_n)$ and using the convention that $\sigma_1 \geq \dots\geq\sigma_n=0$, we can also write $A$ as follows $ A = \sum_{i=1}^n \sigma_i u_iv^T_i$ and form $A_k$ by truncating the sum at some $k \leq n$. This approach, which gives the best possible rank $k$ approximation by the Eckart-Young-Mirsky theorem, is often computationally infeasible.  Similar algorithms can be used if $A$ has a special structure, such as symmetry.
+    \item \textbf{$CUR$ decomposition}: For $A$ an $m \times n$ matrix, the $CUR$ decompositon is formed by selecting small subsets of $A$'s columns in the $m \times k$ matrix $C$, rows in $k \times n$ matrix $R$, and linking the two using $k\times k$ matrix $U$ such that $A_k = CUR$. Serving as a representative of submatrix-oriented decompositions, these algorithms, though more prone to numerical instability, can require less storage to compute than SVD-like decompositions, especially when $A$ is sparse. 
+\end{itemize}
+
+Nevertheless, using randomized techniques on the low-rank approximation problem can lead to improved efficiency and stability, if the right sketching operator is chosen, especially for large matrices target matrices where these algorithms would prove otherwise infeasible (e.g. the SVD decomposition taking $\bO(mn^2)$).
+
 %\begin{itemize}
 %\item[$\bullet$]Spectral decomposition:this consists of low-rank SVD and Hermitian eigendecomposition.
 %\item[$\bullet$]Submatrix-oriented decomposition:CUR decomposition and interpolative decompositions.
@@ -254,13 +226,14 @@ Classical deterministic algorithms for this problem, like singular value decompo
 %\end{itemize}
 %Low-rank approximation has been important in reducing the size of data while randomized algorithms definitely help to reduce the computation it needs.
 
-Here we mainly use randomized SVD as our example of illustration; the steps of randomized SVD could be divided into two parts.  
+%Here we mainly use randomized SVD as our example of illustration; the steps of randomized SVD could be divided into two parts.  
 
-To test the efficiency and accuracy of sketching matrices, we chose randomized SVD with different sketching matrices to test how it compares to standard SVD when we get the same-rank approximation. The randomized SVD algorithm could be partitioned into two parts; first, we use randomization to compute a QB decomposition of the input matrix A, and then we deterministically compute QB's compact SVD, and finally, truncate that SVD to a specific rank.
+%To test the efficiency and accuracy of sketching matrices, we chose randomized SVD with different sketching matrices to test how it compares to standard SVD when we get the same-rank approximation. The randomized SVD algorithm could be partitioned into two parts; first, we use randomization to compute a QB decomposition of the input matrix A, and then we deterministically compute QB's compact SVD, and finally, truncate that SVD to a specific rank.
 
 %To do Hermitian decomposition, each randomized algorithm for low-rank SVD has a corresponding version that is specialized to Hermitian matrices. We recount those specialized algorithms here.But there is still an algorithm that is unique to the approximation of psd matrices.
 
 %In general , we shall say that $A$ is $n\times n$ and the algorithms represent $\hat{A}=V diag(\lambda) V^*$, where $V$ is a tall column-orthonormal matrix and $\lambda$ is a vector with entries sorted in decreasing order of absolute value.
+
 
 Before we start our low-rank approximation, we first introduce one of the building blocks for low-rank approximations, which is called QB decomposition; here we borrow the practice taken in \cite{yu2018efficientrandomizedalgorithmsfixedprecision} as a representative. See algorithm \ref{algorithm 1} as a reference. And the
 \begin{algorithm}
@@ -286,7 +259,7 @@ Before we start our low-rank approximation, we first introduce one of the buildi
 	\end{algorithmic} 
     \label{algorithm 1}
 \end{algorithm}
-After QB, we could do all sorts of deterministic factorization low-rank approximation algorithms on matrix B~\cite{halko2010findingstructurerandomnessprobabilistic}.
+After QB, we could do all sorts of deterministic factorization low-rank approximation algorithms on matrix B~\cite{halko2010findingstructurerandomnessprobabilistic}.%%%
 
 Other than sketching matrices, there are many other questions that need to be considered.
 \begin{itemize}
@@ -299,10 +272,13 @@ Other than sketching matrices, there are many other questions that need to be co
 
 
 \end{itemize}
+
+
 \subsection{Overdetermined Least Squares}
+\label{sec:least_squares}
 The overdetermined least squares problem is defined as follows: \\
 
-\textit{For $A \in \mathbb{R}^{m \times n}, x \in \mathbb{R}^{n}, b \in \mathbb{R}^{m}$ such that $m > n$, minimize x under the constraint $\|Ax - b\|_2^2$.}\\
+\textit{For $A \in \mathbb{R}^{m \times n}, x \in \mathbb{R}^{n}, b \in \mathbb{R}^{m}$ such that $m > n$, minimize $\|Ax - b\|_2^2$.}\\
 
 This can be solved by a number of deterministic algorithms with various trade-offs between speed, accuracy, and stability, including:
 \begin{itemize}
@@ -313,12 +289,25 @@ This can be solved by a number of deterministic algorithms with various trade-of
     \item \textbf{Singular Value Decomposition}:
         This method performs the following factorization $A = U \Sigma V^T$, where $U, V$ are orthogonal and $\Sigma$ is diagonal. The SVD van be used to solve the problem by setting $x = V \Sigma^+U^Tb$ where $\Sigma^+$ is the psuedoinverse of $\Sigma$. While the most numerically stable, the SVD takes $\bO(mn^2)$, not to mention the matrix multiplication required to form $x$.
 \end{itemize}
+However, for $m$ large, the latter two algorithms may become impractically slow.
 
 \section{Experiments}
 \subsection{Datasets}
-We use the dataset from MedMNIST\cite{medmnistv1,medmnistv2}. In our experiments, we use the dataset of breast, which consists of three parts: training dataset, validation dataset, and test dataset. We just use the training dataset here which has 546 data points, see \href{https://zenodo.org/records/10519652} {https://zenodo.org/records/10519652}. Another thing that is worth attention is that the data is almost full-rank. It is also worth attention that most of the data points are very ill-conditioned. Here we examine some basic statistical descriptions about condition numbers. See Figure \ref{tab:condition} as a reference.
+\label{sec:datasets}
+For our experiments we use both real life data and synthetic data. 
+We use the dataset from MedMNIST\cite{medmnistv1,medmnistv2}. In our experiments, we use the dataset of breast, which consists of three parts: training dataset, validation dataset, and test dataset. We just use the training dataset here which has $546$ data points, see \href{https://zenodo.org/records/10519652} {https://zenodo.org/records/10519652}. 
+Another thing that is worth attention is that the data is almost full-rank. It is also worth attention that most of the data points are very ill-conditioned. 
+Here we examine some basic statistical descriptions about condition numbers. See Figure \ref{tab:condition} as a reference. 
+In addition to that, we use scikit-learn's dataset on Californian housing\footnote{\href{https://scikit-learn.org/1.5/modules/generated/sklearn.datasets.fetch_california_housing.html}{\texttt{https://scikit-learn.org/1.5/modules/generated/sklearn.datasets.fetch\_california\_housing.html}}}
+, which is suitable for least squares.
+As the dataset contains $20640$ data points we sample a smaller, easier to handle number of $1024$ data points.
+Our synthetically generated data are split into three different categories. First, we use matrices A with all entries sampled i.i.d. from a standard normal distribution, these behave very numerically very nicely and serve as a good basecase. Second we use matrices with a singular values that span a wide range, causing a very high condition number. In particular, we select $A = U \Sigma V^T$ with $U, V$ orthogonal and $\Sigma$ diagonal with $\sigma_{ii} = e^{k_i}$, where $k_i$ are equidistantly spread in $\{-10, 10\}$. Last, we utilize multicolinear matrices that we generate by sampling a vector $a$ from a i.i.d. standard normal distribution and then setting $A$'s $i$'th column to $a_i = a + 10^{-6}\theta_i$ where $\theta_i$ are also standard normal random vectors with independent components. 
 
-\begin{table}
+
+
+    
+\begin{comment}
+    \begin{table}
     \centering
     \begin{tabular}{cc}
       variable   &value \\
@@ -344,13 +333,31 @@ We use the dataset from MedMNIST\cite{medmnistv1,medmnistv2}. In our experiments
     \caption{Caption}
     \label{tab:condition}
 \end{table}
+\end{comment}  
+
  %, which, according to theorem 1 stated in Yu's work as well~\cite{yu2018efficientrandomizedalgorithmsfixedprecision}, that 
 %\begin{theorem}
 %Let A be an $m\times n$ matrix. Q denotes an $m\times k$ orthonormal matrix($k\textless m$), and $B=Q^TA$. Then,\[||A-QB||_F^2=||A||_F^2-||B||_F^2\]
 %\end{theorem}
 \subsection{Results}
-Our results are shown in Figure \ref{fig:enter-label}, and the table containing concrete numbers is shown in 
-\ref{tab:table for descriptions}. We also conducted numerical experiments solving the low-rank approximation problem.
+\label{sec:results}
+\subsubsection{Low Rank Approximation}
+\label{sec:results_low_rank_apprximation}
+Our results are shown in Figure \ref{fig:results on breastmnist boxplot}, and the table containing concrete numbers is shown in 
+\begin{figure}[h]
+\begin{subfigure}
+    {0.5\textwidth}\includegraphics[width=0.9\linewidth,height=6cm]{figures/boxplot_BREASTMNIST.png}
+    \caption{Randomized SVD results on BreastMMNIST DATASET}
+    \label{fig:results on breastmnist boxplot}
+    \end{subfigure}
+    \begin{subfigure}
+    {0.5\textwidth}\includegraphics[width=1.0\linewidth,height=7cm]{splines for breastmnist.png}
+    \caption{splines for numerical experiments}
+    \label{fig:m1_lowrank}
+\end{subfigure}
+\end{figure}
+\ref{tab:table for descriptions}. We also conducted numerical experiments solving the low-rank approximation problem.The result is shown in \ref{fig:m1_lowrank}
+
 \begin{table}
     \centering
     \begin{tabular}{cccccc}
@@ -373,68 +380,66 @@ Our results are shown in Figure \ref{fig:enter-label}, and the table containing 
     \caption{The Performance of Different Sketching Matrices on breastMNIST}
     \label{tab:table for descriptions}
 \end{table}
-\begin{figure}
-    \centering
-    \includegraphics[width=0.5\linewidth]{figures/output_for_sketching_matrices.png}
-    \caption{The boxplots for relative errors for different kinds of sketching matrices}
-    \label{fig:low_rank_results}
-\end{figure}
 \subsubsection{Least Squares}
-We used a number of different types of matrices for $A$, for which we solved 
+We solved the least squares problem $\min_x \Vert Ax - b \Vert_2$ for the three types of matrices described in \hyperref[sec:datasets]{Section~\ref*{sec:datasets}} using all sketching methods introduced so far using both the QR and the SVD algortithm as outlined in \hyperref[sec:least_squares]{Section~\ref*{sec:least_squares}}. For all choices of $A$ we chose $b$ as a standard normal random vector with independent components. We found both methods to yield the same accuracy so we only depict the results for QR here. 
+In order to measure the accuracy of our the different sketching methods we used the following two metrics. First, the relative norm of the residual, i.e.,
 $$
-\min_x \Vert Ax - b \Vert_2.
+\frac{\Vert Ax_{\mathrm{opt}} - b \Vert_2 - \Vert Ax_{\mathrm{sketch}} - b \Vert_2}{\Vert Ax_{\mathrm{opt}} - b \Vert_2},
 $$
-To determine the accuracy of our the different sketching methods we consider two different metrics. First, the relative norm of the residual, i.e.,
+and second, the relative error of the found $x_{\mathrm{sketch}}$, i.e.,
 $$
-\frac{\Vert Ax_{\mathrm{opt}} - b \Vert_2 - Ax_{\mathrm{sketch}} - b \Vert_2}{\Vert Ax_{\mathrm{opt}} - b \Vert_2},
+\frac{\Vert x_{\mathrm{opt}} - x_{\mathrm{sketch}}\Vert_2} {\Vert x_{\mathrm{opt}} \Vert_2}.
 $$
-and second, the relative error of the found x, i.e.,
-$$
-\frac{\Vert x_{\mathrm{opt}} - x_{\mathrm{sketch}\Vert_2}} {\Vert x_{\mathrm{opt}} \Vert_2}.
-$$
-These are the types of matrices we used for $A \in \mathbb{R}^{m \times n}$: 
-\begin{itemize}
-    \item entries sampled i.i.d. from a standard normal distribution
-    \item $A = U \Sigma V^T$ with $U, V$ orthognal and $\Sigma$ diagonal with $sigma_{ii} = e^{k_i}$, where $k_i$ are equidistantly spread in $\{-10, 10\}$
-    \item multicolinear, i.e. the $i$'th column of $A$ is $a + 10^{-6}\theta_i$ where $\theta_i$ are standard normal random vectors. 
-\end{itemize}
-For all choices of $A$ we always choose $b$ as a standard normal random vector with independent components. 
+repeating these experiments for many different sizes of $A$ yields genuinely similar behavior. Thus, in \hyperref[fig:qr_results]{Figure \ref*{fig:qr_results}} we only chose to depict the results for $A \in \mathbb{R}^{256 \times 20}$. 
 \begin{figure}[htb]
   \centering
   \begin{minipage}[t]{.32\linewidth}
     \centering
-    \includegraphics[width=\textwidth]{figures/least_squares/qr_err_vs_k_gaussian_loops100_m256_n2034303639.pdf}
+    \includegraphics[width=\textwidth]{figures/least_squares/qr_err_vs_k_gaussian_loops100_m256_n2034399542.pdf}
   \end{minipage}
   \begin{minipage}[t]{.32\linewidth}
     \centering
-    \includegraphics[width=\textwidth]{figures/least_squares/qr_err_vs_k_multicollinerarity_loops100_m256_n2034318687.pdf}
+    \includegraphics[width=\textwidth]{figures/least_squares/qr_err_vs_k_multicollinerarity_loops100_m256_n2034399459.pdf}
   \end{minipage}
   \begin{minipage}[t]{.32\linewidth}
     \centering
-    \includegraphics[width=\textwidth]{figures/least_squares/qr_err_vs_k_singular_spread_loops100_m256_n2034319072_20ord.pdf}
+    \includegraphics[width=\textwidth]{figures/least_squares/qr_err_vs_k_singular_spread_loops100_m256_n2034399665.pdf}
   \end{minipage}
   \begin{minipage}[t]{.32\linewidth}
     \centering
-    \includegraphics[width=\textwidth]{figures/least_squares/qr_err_vs_k_gaussian_loops100_m256_n2034306017.pdf}
+    \includegraphics[width=\textwidth]{figures/least_squares/qr_err_vs_k_gaussian_loops100_m256_n2034400377.pdf}
   \end{minipage}
   \begin{minipage}[t]{.32\linewidth}
     \centering
-    \includegraphics[width=\textwidth]{figures/least_squares/qr_err_vs_k_multicollinerarity_loops100_m256_n2034318744.pdf}
+    \includegraphics[width=\textwidth]{figures/least_squares/qr_err_vs_k_multicollinerarity_loops100_m256_n2034400280.pdf}
   \end{minipage}
   \begin{minipage}[t]{.32\linewidth}
     \centering
-    \includegraphics[width=\textwidth]{figures/least_squares/qr_err_vs_k_singular_spread_loops100_m256_n2034319204_20ord.pdf}
+    \includegraphics[width=\textwidth]{figures/least_squares/qr_err_vs_k_singular_spread_loops100_m256_n2034400517.pdf}
   \end{minipage}
-  \caption{Accuracy of least squares using different sketching methods and different matrices $A$ for i.i.d. Gaussian $b$ averaged over 100 runs each. From left to right $A$ is chosen to be i.i.d. Gaussian, be multicolinear, have a spectrum spreading 10 orders of magnitude. The relative error of $\Vert Ax-b\Vert_2$ is depicted at the top and the relative error of $x$ measured in $\Vert \cdot \Vert_2$ at the bottom.}
+  \caption{Accuracy of least squares using different sketching methods and different matrices $A$ for i.i.d. Gaussian $b$ averaged over 100 runs each. From left to right $A$ is chosen to be i.i.d. Gaussian, be multicolinear, and have a spectrum spreading 20 orders of magnitude. The relative error of of the residual is depicted at the top and the relative error in $x$ at the bottom.}
   \label{fig:qr_results}
 \end{figure}
+
+We repeated the same process for the Californian housing dataset introduced in \hyperref[sec:datasets]{Section~\ref*{sec:datasets}}. Here we found the same behavior for the orthogonal and dense sketching methods. Although and SEE still return good results we observe that CWT's accuracy has significantly gone down, similar to the observations we made for low-rank approximation in \hyperref[sec:results_low_rank_apprximation]{Section \ref*{sec:results_low_rank_apprximation}}. Furthermore, we found that all trigonometric transforms performed much worse on this data set, achieving relative errors for the residual of around 2 across all tested sketching sizes.  
+
+
+
 \section{discussion}
-Findings:
+Our gathered data presented in \hyperref[sec:results]{Section~\ref*{sec:results}} enables us to make the following observations and allows us to draw some interesting conclusions.
+For one we were able to empirically show that all dense i.i.d. sketching operators behave equivalently as proposed in \hyperref[sec:Dense sketching operators]{Section~\ref*{sec:Dense sketching operators}}. This can be clearly seen in \hyperref[fig:low_rank_results]{Figure \ref*{fig:low_rank_results}} where they all cluster achieving similar accuracies regardless of the sketching size $k$. Similarly, the figure suggests that the same might be true for the subsampled random trigonometric transformations, which cluster in a similar manner. 
+
+Next, we conclude, that distortion presents a good measure to indicate the quality of a sketching method (at least for least squares). This can be seen as the clusters found in the distortion plot of \hyperref[fig:sketch_properties]{Figure \ref*{fig:sketch_properties}}) are identical to those found in \hyperref[fig:qr_results]{Figure \ref*{fig:qr_results}}. 
+
+Interestingly, we find that the sparse operators do not form as distinct clusters as the before mentioned groups. For the numerically well behaved Matrix $A$ with i.i.d. standard normal entries we see that they perform just as well as the dense operators. In this case they certainly favorable as their computational cost is $O(nnz)$ compared to the $O(n^3)$ of the dense operators. We observe the same for the multicolinear matrices, however, when it comes to the 
 \begin{itemize}
-    \item We were able to empirically verify that the dense sketching operators with i.i.d. entries behave alike (compare \hyperref[fig:low_rank_results]{Figure \ref*{fig:low_rank_results}} and \hyperref[fig:qr_results]{Figure \ref*{fig:qr_results}})
-    Similarly, we found that all the trig-transforms achieve comparable accuracy as well as the sparse sketching operators.
+
     \item  Distortion is a good measure to indicate the quality of a sketching method (at least for least squares). This can be seen as the clusters found in the distortion plot of \hyperref[fig:sketch_properties]{Figure \ref*{fig:sketch_properties}}) are identical to those found in \hyperref[fig:qr_results]{Figure \ref*{fig:qr_results}}.
     \item For all different types of matrices used to test least squares, we found the same clusters of accuracies. 1. Orthogonal, 2. Dense \& Sparse, 3. SRFTs. Since sparse and dense operators yield similar results, sparse operators are clearly favorable.
+    \item For numerically nice matrices $A$ sparse and dense sketching matrices behave alike, clearly favoring sparse matrices. However, for more complicated matrices such as in the third column of \hyperref[fig:qr_results]{Figure \ref*{fig:qr_results}}, sparse sketching matrices struggle to capture $A$ accurately, especially when the number of non-zero entries is low as for WCT. 
+    \item jlt outperformce the other sparse operators and still works well for badly conditioned $A$ See  and \hyperref[fig:qr_results]{Figure \ref*{fig:qr_results}}
+    \item for given dataset for low rank approximation, k = 300 seems to be sweet spot? (Check whether we can find theoretical guarantees that this is just the right size for k)
+    \item TODO: Change low rank approximation results plot to have a logarithmic y-axis
     
 \end{itemize}
 \printbibliography

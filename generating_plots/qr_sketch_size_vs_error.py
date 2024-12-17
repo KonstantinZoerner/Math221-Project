@@ -99,8 +99,8 @@ if __name__ == "__main__":
     # plot_sketch_size_vs_error_singular_spread(loops = 10, m = 1024, n = 100, k_range = range(150, 500, 20))
     l = 100
     cr = False
-    m = 1024, 
-    n = 100, 
+    m = 1024
+    n = 100
     k_range = range(140, 500, 20)
 
     print("=====================\nMulticollinerarity\n=====================")
