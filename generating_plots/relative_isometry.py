@@ -22,7 +22,7 @@ def draw_relative_spread(sketching_functions_dict):
 def compute_relative_spread(sketching_function, loops = 1000):
     results = np.zeros(loops)
     m = 256
-    n = 200
+    n = 20
     k = 50
     for i in range(loops):
         A = np.random.standard_normal((m, n))

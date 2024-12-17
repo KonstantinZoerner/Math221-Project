@@ -21,12 +21,6 @@ from sketching_methods.jlt.linearMapping import calculate_R
 # Only returns the sketching matrix, not the sketched matrix
 # =============================================================================
 
-from sketching_methods.jlt.linearMapping import calculate_R
-def JLT_sketching_matrix(k,m):
-    JLT_matrix=calculate_R(m,k,s=1,random_seed=21,swr=True)
-    return JLT_matrix
-
-
 def orthogonal_sketching_matrix(k, m):
     """ checked that scaling works :) """
     F = utilities.helpers.get_random_orth_matrix(k, m)
@@ -129,7 +123,7 @@ def sparse_sign_embedding_sketch_matrix(k, m, zeta=8):
     return S * (1 / np.sqrt(zeta))
 
 def JLT_sketching_matrix(k,m):
-    JLT_matrix=calculate_R(m,k,s=1,random_seed=21,swr=True)
+    JLT_matrix=calculate_R(m,k,s=1,random_seed=np.random.randint(1, 1e6),swr=True)
     return JLT_matrix
 
 
