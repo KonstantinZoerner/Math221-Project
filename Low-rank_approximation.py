@@ -75,9 +75,9 @@ if __name__ == "__main__":
         'SSE':sparse_sign_embedding_sketch_matrix
     }
   
-    sketch_sizes = range(100, 700, 10)
+    sketch_sizes = range(100, 300, 10)
     results = {name: [] for name in methods.keys()}
-    results['svd']=[]
+    
     for sketch_size in sketch_sizes:
         for name, func in methods.items():
             error = evaluate_sketching(A, func,n_iter,sketch_size)
@@ -96,17 +96,17 @@ if __name__ == "__main__":
     plt.title("Performance of Sketching Methods on m1")
     plt.legend()
     plt.grid()
-    plt.savefig('m1_low_rank_2.pdf')
+    plt.savefig('m1_low_rank_3.pdf')
 
     #Check the singular values
     print('A1',np.linalg.cond(A))
 
-    from generate_test_matrices.genrate_A import generate_hilbert,generate_multicollinerarity,generate_spread_singular_values,generate_spread_singular_values_with_noise
+''' from generate_test_matrices.genrate_A import generate_hilbert,generate_multicollinerarity,generate_spread_singular_values,generate_spread_singular_values_with_noise
     A_2=generate_spread_singular_values_with_noise((512,1024))
   
     sketch_sizes = range(100, 700, 10)
     results = {name: [] for name in methods.keys()}
-    results['svd']=[]
+    #results['svd']=[]
     for sketch_size in sketch_sizes:
         for name, func in methods.items():
             error = evaluate_sketching(A_2, func,n_iter,sketch_size)
@@ -135,15 +135,15 @@ if __name__ == "__main__":
     
     sketch_sizes = range(100, 700, 10)
     results = {name: [] for name in methods.keys()}
-    results['svd']=[]
+    #results['svd']=[]
     for sketch_size in sketch_sizes:
         for name, func in methods.items():
             error = evaluate_sketching(A_3, func,n_iter,sketch_size)
             results[name].append(error)
-    ''' U,S,V=svd(A_3,full_matrices=False)
+     U,S,V=svd(A_3,full_matrices=False)
         approx_svd=U[:,:sketch_size]@np.diag(S[:sketch_size])@V[:sketch_size,:]
         error_svd=norm(approx_svd-A_3,'fro')/norm(A_3,'fro')
-        results['svd'].append(error_svd)'''
+        results['svd'].append(error_svd)
             #print(name)
     # Plot results
     plt.figure(figsize=(10, 6))
@@ -162,16 +162,16 @@ if __name__ == "__main__":
   
     sketch_sizes = range(100, 700, 10)
     results = {name: [] for name in methods.keys()}
-    results['svd']=[]
+    #results['svd']=[]
     for sketch_size in sketch_sizes:
         for name, func in methods.items():
             error = evaluate_sketching(A_4, func,n_iter,sketch_size)
             results[name].append(error)
             #print(name)
-        '''U,S,V=svd(A_4,full_matrices=False)
+        U,S,V=svd(A_4,full_matrices=False)
         approx_svd=U[:,:sketch_size]@np.diag(S[:sketch_size])@V[:sketch_size,:]
-        error_svd=norm(approx_svd-A_4,'fro')/norm(A_4,'fro')'''
-        '''results['svd'].append(error_svd)'''
+        error_svd=norm(approx_svd-A_4,'fro')/norm(A_4,'fro')
+        results['svd'].append(error_svd)
     # Plot results
     plt.figure(figsize=(10, 6))
     for name, errors in results.items():
@@ -190,15 +190,15 @@ if __name__ == "__main__":
   
     sketch_sizes = range(100, 700, 10)
     results = {name: [] for name in methods.keys()}
-    results['svd']=[]
+    #results['svd']=[]
     for sketch_size in sketch_sizes:
         for name, func in methods.items():
             error = evaluate_sketching(A_5, func,n_iter,sketch_size)
             results[name].append(error)
-        '''U,S,V=svd(A_5,full_matrices=False)
+        U,S,V=svd(A_5,full_matrices=False)
         approx_svd=U[:,:sketch_size]@np.diag(S[:sketch_size])@V[:sketch_size,:]
         error_svd=norm(approx_svd-A_5,'fro')/norm(A_5,'fro')
-        results['svd'].append(error_svd)'''
+        results['svd'].append(error_svd)
             #print(name)
     # Plot results
     plt.figure(figsize=(10, 6))
@@ -212,3 +212,4 @@ if __name__ == "__main__":
     plt.grid()
     plt.savefig('m5_low_rank_2.pdf')
     print('A5',np.linalg.cond(A_5))
+'''
