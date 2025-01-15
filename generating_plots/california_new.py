@@ -59,6 +59,7 @@ def plot_sketch_size_vs_error(A, b, sol_exact, k_range, loops = 20,\
         plt.ylabel("Relative Error of residual in 2-Norm")
     else:
         plt.ylabel("Relative Difference of x in 2-Norm")
+    plt.yscale("log")
     plt.rcParams['text.usetex'] = True
     plt.title(r"Least squares for for Californian housing data")
     plt.rcParams['text.usetex'] = False
@@ -67,16 +68,17 @@ def plot_sketch_size_vs_error(A, b, sol_exact, k_range, loops = 20,\
     helpers.save_plot(f"{title}_loops{loops}_california")
     plt.show()
 
-def plot_california(loops = 20, k_range = range(50, 1000, 50), compute_residual=False):
-    sketching_matrix_functions = {"Orthogonal": sketching.orthogonal_sketching_matrix, 
-                            "Gaussian": sketching.gaussian_sketching_matrix,
-                            "Uniform": sketching.uniform_sketching_matrix,
-                            "Rademacher": sketching.rademacher_sketch_matrix,
-                            "SRFT (real)": sketching.SRFT_real_sketch_matrix,
-                            "SRFT (complex)": sketching.SRFT_complex_sketch_matrix,
-                            "Hadamard": sketching.hadamard_sketch_matrix, 
-                            # "CWT": sketching.cwt_sketch_matrix,
-                            "SSE": sketching.sparse_sign_embedding_sketch_matrix}
+def plot_california(loops = 20, k_range = range(50, 1000, 50), compute_residual=True):
+    sketching_matrix_functions = {#"Orthogonal": sketching.orthogonal_sketching_matrix, 
+                            #"Gaussian": sketching.gaussian_sketching_matrix,
+                            #"Uniform": sketching.uniform_sketching_matrix,
+                            #"Rademacher": sketching.rademacher_sketch_matrix,
+                            #"SRFT (real)": sketching.SRFT_real_sketch_matrix,
+                            #"SRFT (complex)": sketching.SRFT_complex_sketch_matrix,
+                            #"Hadamard": sketching.hadamard_sketch_matrix, 
+                            #"CWT": sketching.cwt_sketch_matrix,
+                            #"SSE": sketching.sparse_sign_embedding_sketch_matrix,
+                            "JLT": sketching.JLT_sketching_matrix}
     
     A, b = california.load_california_housing()
     sol_exact = compute_true_result(A, b)
@@ -86,4 +88,4 @@ def plot_california(loops = 20, k_range = range(50, 1000, 50), compute_residual=
                                 loops=loops, SVD=False, compute_residual=compute_residual)
 
 if __name__ == "__main__":
-    plot_california(loops=20)
+    plot_california(loops=5)

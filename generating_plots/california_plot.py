@@ -83,4 +83,4 @@ def plot_sketch_size_vs_error_california(loops = 1, k_range = range(50, 1000, 20
 
 if __name__ == "__main__":
     print("=====================\California\n=====================")
-    plot_sketch_size_vs_error_california(loops = 1, compute_residual=True)
+    plot_sketch_size_vs_error_california(loops = 5, compute_residual=True)

@@ -12,18 +12,14 @@ from scipy.linalg import svd
 from numpy.random import Generator as Generator
 from scipy.sparse import csc_matrix
 import numbers
+from sketching_methods.jlt.linearMapping import calculate_R
+
 
 
 
 # =============================================================================
 # Only returns the sketching matrix, not the sketched matrix
 # =============================================================================
-
-from sketching_methods.jlt.linearMapping import calculate_R
-def JLT_sketching_matrix(k,m):
-     JLT_matrix=calculate_R(m,k,s=1,random_seed=21,swr=True)
-     return JLT_matrix
-
 
 def orthogonal_sketching_matrix(k, m):
     """ checked that scaling works :) """
@@ -118,14 +114,6 @@ def cwt_sketch_matrix(k,m,rng=None):
     S = csc_matrix((signs, rows, cols), shape=(k, m))
     return S
 
-# def sparse_sign_embedding_sketch_matrix(k, m, zeta = 8):
-#     # scaling correct :)
-#     S = np.zeros((k, m))
-#     for i in range(m):
-#         for j in np.random.choice(range(k), zeta, replace=False):
-#             S[j, i] = np.random.choice([-1, 1])
-#     return 1/np.sqrt(zeta)*S
-
 def sparse_sign_embedding_sketch_matrix(k, m, zeta=8):
     S = scipy.sparse.lil_matrix((k, m))
     for i in range(m):
@@ -134,14 +122,10 @@ def sparse_sign_embedding_sketch_matrix(k, m, zeta=8):
     S = S.tocsr()  
     return S * (1 / np.sqrt(zeta))
 
+def JLT_sketching_matrix(k,m):
+    JLT_matrix=calculate_R(m,k,s=1,random_seed=np.random.randint(1, 1e6),swr=True)
+    return JLT_matrix
 
-# def sparse_sign_embedding_sketch_matrix(k, m, zeta=8):
-#     row_indices = np.repeat(np.arange(m), zeta) 
-#     col_indices = np.concatenate([np.random.choice(k, zeta, replace=False) for _ in range(m)])
-#     data = np.random.choice([-1, 1], size=m * zeta)
-
-#     S = scipy.sparse.coo_matrix((data, (col_indices, row_indices)), shape=(k, m))
-#     return S.todense() * (1 / np.sqrt(zeta))
 
    
 sketching_matricies_dict = {"Orthogonal": orthogonal_sketching_matrix, 
@@ -152,7 +136,8 @@ sketching_matricies_dict = {"Orthogonal": orthogonal_sketching_matrix,
                             "SRFT (complex)": SRFT_complex_sketch_matrix,
                             "Hadamard": hadamard_sketch_matrix, 
                             "CWT": cwt_sketch_matrix,
-                            "SSE": sparse_sign_embedding_sketch_matrix}
+                            "SSE": sparse_sign_embedding_sketch_matrix, 
+                            "JLT": JLT_sketching_matrix}
 
 sketching_matricies_dict_correct_scaling = {"Orthogonal": orthogonal_sketching_matrix,
                                             "Gaussian": gaussian_sketching_matrix,
@@ -282,6 +267,10 @@ def sketch_sparse_sign_embedding(k, A, zeta = 8):
     S = sparse_sign_embedding_sketch_matrix(k, A.shape[0], zeta)
     return S @ A
 
+def sketch_JLT(k, A):
+    S = JLT_sketching_matrix(k, A.shape[0])
+    return S @ A
+
 sketching_functions_dict = {"Orthogonal": sketch_orthogonal, 
                             "Gaussian": sketch_gaussian,
                             "Uniform": sketch_uniform,
@@ -290,7 +279,8 @@ sketching_functions_dict = {"Orthogonal": sketch_orthogonal,
                             "SRFT (complex)": sketch_SRFT_complex,
                             "Hadamard": sketch_hadamard, 
                             "CWT": sketch_CWT,
-                            "SSE": sketch_sparse_sign_embedding}
+                            "SSE": sketch_sparse_sign_embedding, 
+                            "JLT": sketch_JLT}
 
 sketching_functions_dict_correct_scaling = {"Orthogonal": sketch_orthogonal,
                                             "Gaussian": sketch_gaussian,

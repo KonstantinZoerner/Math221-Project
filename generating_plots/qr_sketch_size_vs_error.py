@@ -68,63 +68,25 @@ def plot_sketch_size_vs_error(m = 1024, n = 50, k_range = [60, 80, 100, 125, 250
     # plt.show()
     plt.cla()
 
-def plot_sketch_size_vs_error_gaussian(loops = 20, compute_residual=True):
-    m = 256
-    n = 20
-    k_range = range(40, 100, 5)
-    sketching_matrix_functions = sketching_matricies_dict = {"Orthogonal": sketching.orthogonal_sketching_matrix, 
-                            "Gaussian": sketching.gaussian_sketching_matrix,
-                            "Uniform": sketching.uniform_sketching_matrix,
-                            "Rademacher": sketching.rademacher_sketch_matrix,
-                            "SRFT (real)": sketching.SRFT_real_sketch_matrix,
-                            "SRFT (complex)": sketching.SRFT_complex_sketch_matrix,
-                            "Hadamard": sketching.hadamard_sketch_matrix, 
-                            # "CWT": sketching.cwt_sketch_matrix,
-                            "SSE": sketching.sparse_sign_embedding_sketch_matrix}
+def plot_sketch_size_vs_error_gaussian(loops = 20, compute_residual=True,m = 256, n = 20, k_range = range(40, 100, 5)):
+    sketching_matrix_functions = sketching.sketching_matricies_dict
     plot_sketch_size_vs_error(A_generator=np.random.standard_normal, sketching_matrix_function_dict=sketching_matrix_functions,\
                                 title="qr_err_vs_k_gaussian", m=m, n=n, k_range=k_range, loops=loops,\
                                 SVD=True, compute_residual=compute_residual)
 
-def plot_sketch_size_vs_error_hilbert(loops = 20, compute_residual=True):
-    m = 256
-    n = 20
-    k_range = range(40, 100, 5)
-    sketching_matrix_functions = {"Orthogonal": sketching.orthogonal_sketching_matrix, 
-                            "Gaussian": sketching.gaussian_sketching_matrix,
-                            "Uniform": sketching.uniform_sketching_matrix,
-                            "Rademacher": sketching.rademacher_sketch_matrix,
-                            "SRFT (real)": sketching.SRFT_real_sketch_matrix,
-                            "SRFT (complex)": sketching.SRFT_complex_sketch_matrix,
-                            "Hadamard": sketching.hadamard_sketch_matrix, 
-                            # "CWT": sketching.cwt_sketch_matrix,
-                            "SSE": sketching.sparse_sign_embedding_sketch_matrix}
+def plot_sketch_size_vs_error_hilbert(loops = 20, compute_residual=True, m = 256, n = 20, k_range = range(40, 100, 5)):
+    sketching_matrix_functions = sketching.sketching_matricies_dict
     plot_sketch_size_vs_error(A_generator=genrate_A.generate_hilbert, sketching_matrix_function_dict=sketching_matrix_functions, title="qr_err_vs_k_hilbert", m=m, n=n, k_range=k_range, loops=loops, SVD=True, compute_residual=compute_residual)
 
 def plot_sketch_size_vs_error_singular_spread(loops = 20, m = 256, n = 20, k_range = range(40, 100, 5), compute_residual=True):
-    sketching_matrix_functions = {"Orthogonal": sketching.orthogonal_sketching_matrix, 
-                            "Gaussian": sketching.gaussian_sketching_matrix,
-                            "Uniform": sketching.uniform_sketching_matrix,
-                            "Rademacher": sketching.rademacher_sketch_matrix,
-                            "SRFT (real)": sketching.SRFT_real_sketch_matrix,
-                            "SRFT (complex)": sketching.SRFT_complex_sketch_matrix,
-                            "Hadamard": sketching.hadamard_sketch_matrix, 
-                            # "CWT": sketching.cwt_sketch_matrix,
-                            "SSE": sketching.sparse_sign_embedding_sketch_matrix}
+    sketching_matrix_functions = sketching.sketching_matricies_dict
     plot_sketch_size_vs_error(A_generator=genrate_A.generate_spread_singular_values,\
                                 sketching_matrix_function_dict=sketching_matrix_functions,\
                                 title="qr_err_vs_k_singular_spread", m=m, n=n, k_range=k_range,\
                                 loops=loops, SVD=True, compute_residual=compute_residual)
 
 def plot_sketch_size_vs_error_multicollinerarity(loops = 20, m = 256, n = 20, k_range = range(40, 100, 5), compute_residual=True):
-    sketching_matrix_functions = {"Orthogonal": sketching.orthogonal_sketching_matrix, 
-                            "Gaussian": sketching.gaussian_sketching_matrix,
-                            "Uniform": sketching.uniform_sketching_matrix,
-                            "Rademacher": sketching.rademacher_sketch_matrix,
-                            "SRFT (real)": sketching.SRFT_real_sketch_matrix,
-                            "SRFT (complex)": sketching.SRFT_complex_sketch_matrix,
-                            "Hadamard": sketching.hadamard_sketch_matrix, 
-                            # "CWT": sketching.cwt_sketch_matrix,
-                            "SSE": sketching.sparse_sign_embedding_sketch_matrix}
+    sketching_matrix_functions = sketching.sketching_matricies_dict
     plot_sketch_size_vs_error(A_generator=genrate_A.generate_multicollinerarity,\
                                 sketching_matrix_function_dict=sketching_matrix_functions,\
                                 title="qr_err_vs_k_multicollinerarity", m=m, n=n, k_range=k_range,\
@@ -136,13 +98,17 @@ if __name__ == "__main__":
     #plot_sketch_size_vs_error(A_generator=genrate_A.generate_hilbert)
     # plot_sketch_size_vs_error_singular_spread(loops = 10, m = 1024, n = 100, k_range = range(150, 500, 20))
     l = 100
-    cr = True
+    cr = False
+    m = 1024
+    n = 100
+    k_range = range(140, 500, 20)
+
     print("=====================\nMulticollinerarity\n=====================")
-    plot_sketch_size_vs_error_singular_spread(loops = l, compute_residual=False)
-    plot_sketch_size_vs_error_singular_spread(loops = l, compute_residual=True)
-    # print("=====================\nGaussian\n=====================")
-    # plot_sketch_size_vs_error_gaussian(loops = l, compute_residual=cr)
+    plot_sketch_size_vs_error_multicollinerarity(loops = l, compute_residual=cr, m=m, n=n, k_range=k_range)
+    print("=====================\nGaussian\n=====================")
+    plot_sketch_size_vs_error_gaussian(loops = l, compute_residual=cr, m=m, n=n, k_range=k_range)
+    print("=====================\nSingular Spread\n=====================")
+    plot_sketch_size_vs_error_singular_spread(loops = l, compute_residual=cr, m=m, n=n, k_range=k_range)
+
     # print("=====================\nHilbert\n=====================")
-    # plot_sketch_size_vs_error_singular_spread(loops = l, compute_residual=cr)
-    # print("=====================\nSingular Spread\n=====================")
     # plot_sketch_size_vs_error_hilbert(loops = l, compute_residual=cr)
