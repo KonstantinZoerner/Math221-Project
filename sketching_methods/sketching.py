@@ -279,8 +279,8 @@ sketching_functions_dict = {"Orthogonal": sketch_orthogonal,
                             "SRFT (complex)": sketch_SRFT_complex,
                             "Hadamard": sketch_hadamard, 
                             "CWT": sketch_CWT,
-                            "SSE": sketch_sparse_sign_embedding, 
-                            "JLT": sketch_JLT}
+                            "SSE": sketch_sparse_sign_embedding}
+                            #"JLT": sketch_JLT
 
 sketching_functions_dict_correct_scaling = {"Orthogonal": sketch_orthogonal,
                                             "Gaussian": sketch_gaussian,
