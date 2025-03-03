@@ -265,9 +265,9 @@ def sketch_sparse_sign_embedding(k, A, zeta = 8):
     # scaling correct :)
     S = sparse_sign_embedding_sketch_matrix(k, A.shape[0], zeta)
     return S @ A
-def sketch_():
 
-    return
+def sketch_SRHT(A,d,k,m,random_seed,swr):
+    return SRHT(A,d,k,m,random_seed,swr)
 
 sketching_functions_dict = {"Orthogonal": sketch_orthogonal, 
                             "Gaussian": sketch_gaussian,
