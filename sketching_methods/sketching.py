@@ -12,7 +12,8 @@ from scipy.linalg import svd
 from numpy.random import Generator as Generator
 from scipy.sparse import csc_matrix
 import numbers
-from sketching_methods.jlt.linearMapping import calculate_R
+
+from sketching_methods.jlt.linearMapping import SRHT
 
 
 
@@ -122,9 +123,7 @@ def sparse_sign_embedding_sketch_matrix(k, m, zeta=8):
     S = S.tocsr()  
     return S * (1 / np.sqrt(zeta))
 
-def JLT_sketching_matrix(k,m):
-    JLT_matrix=calculate_R(m,k,s=1,random_seed=np.random.randint(1, 1e6),swr=True)
-    return JLT_matrix
+
 
 
    
@@ -136,8 +135,8 @@ sketching_matricies_dict = {"Orthogonal": orthogonal_sketching_matrix,
                             "SRFT (complex)": SRFT_complex_sketch_matrix,
                             "Hadamard": hadamard_sketch_matrix, 
                             "CWT": cwt_sketch_matrix,
-                            "SSE": sparse_sign_embedding_sketch_matrix, 
-                            "JLT": JLT_sketching_matrix}
+                            "SSE": sparse_sign_embedding_sketch_matrix}
+                            #"JLT": JLT_sketching_matrix
 
 sketching_matricies_dict_correct_scaling = {"Orthogonal": orthogonal_sketching_matrix,
                                             "Gaussian": gaussian_sketching_matrix,
@@ -266,10 +265,9 @@ def sketch_sparse_sign_embedding(k, A, zeta = 8):
     # scaling correct :)
     S = sparse_sign_embedding_sketch_matrix(k, A.shape[0], zeta)
     return S @ A
+def sketch_():
 
-def sketch_JLT(k, A):
-    S = JLT_sketching_matrix(k, A.shape[0])
-    return S @ A
+    return
 
 sketching_functions_dict = {"Orthogonal": sketch_orthogonal, 
                             "Gaussian": sketch_gaussian,
