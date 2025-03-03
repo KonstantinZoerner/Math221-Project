@@ -1,0 +1,6 @@
+[submodule "sketching_methods/jlt"]
+	path = sketching_methods/jlt
+	url = https://github.com/dell/jlt.git
+[submodule "sketching_methods/fht"]
+	path = sketching_methods/fht
+	url = https://github.com/nbarbey/fht.git
